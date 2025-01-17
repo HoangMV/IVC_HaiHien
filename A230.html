@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>A230 - KẾ HOẠCH KIỂM TOÁN</title>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Summernote -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/css/toast@1.0.1/fuiToast.min.css">
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/js/toast@1.0.1/fuiToast.min.js"></script>
+    <style>
+        .export-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 24px;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .export-button:hover {
+            background-color: #16a34a;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 160px;
+            padding: 10px 24px;
+            background-color: #14b8a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .print-button:hover {
+            background-color: #0d9488;
+        }
+
+        @media print {
+
+            .print-button,
+            .export-button {
+                display: none;
+            }
+        }
+
+        .save-button {
+            position: fixed !important;
+            top: 20px !important;
+            right: 400px !important;
+            z-index: 9999 !important;
+            padding: 10px 24px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .edit-button {
+            position: fixed;
+            top: 20px;
+            right: 275px;
+            padding: 10px 24px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body
+    style="font-family: 'Times New Roman', serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.4; font-size: 13pt;">
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    <div id="fui-toast"></div>
+    <button onclick="editContent()" class="action-button edit-button">Chỉnh sửa</button>
+    <button onclick="saveContent()" class="action-button save-button">Lưu lại</button>
+    <button onclick="printDocument()" class="action-button print-button">In nhanh</button>
+    <button onclick="exportToWord()" class="export-button">Xuất ra Word</button>
+    <div id="Conten">
+        <!-- Title -->
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td colspan="2" style="text-align: left;">
+                    <p style="margin: 0;"><i>Số: <span data-field="soKhoach"></span></i></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: right;">
+                    <p style="margin: 0;"><i>Hà Nội, <span data-field="ngayKhoach"></span></i></p>
+                </td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <h4 style="margin: 0;">KẾ HOẠCH KIỂM TOÁN BCTC <br>
+                CHO NĂM TÀI CHÍNH KẾT THÚC NGÀY <span data-field="NamKiT"></span>
+            </h4>
+
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+
+            <tr>
+                <td colspan="2" style="text-align: left;">
+                    <p style="margin: 0;"><i>Kính gửi: <span data-field="NguoiDaiDienKH"></span></i></p>
+                </td>
+                <td colspan="3" style="text-align: left;">
+                    <p style="margin: 0;"><i>Chức vụ: <span data-field="ChucVuKH"></span></i></p>
+                </td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <h5 style="margin: 0;"><span data-field="TenKH"></span><br>
+                <span data-field="DiaChiKH"></span>
+            </h5>
+
+        </div>
+        <!-- Legal basis -->
+
+        <p style="margin: 20px 0;">Thưa Quý vị, </p>
+        <p style="margin: 20px 0; text-align: justify;">Chúng tôi rất hân hạnh được Quý vị tin tưởng bổ nhiệm là kiểm
+            toán
+            viên để kiểm toán Báo
+            cáo tài chính cho năm tài chính kết thúc ngày <span data-field="NamKiT"></span> của Quý Công ty. Để công
+            việc
+            kiểm toán được tiến hành
+            thuận lợi, chúng tôi xin gửi đến Quý vị kế hoạch kiểm toán như sau:</p>
+
+        <!-- Party A -->
+        <div style="margin-top: 25px;">
+            <p style="margin: 0; font-weight: bold;">1. Nhóm kiểm toán</span></p>
+            <table style="width: 100%; border-collapse: collapse; margin: 25px 0;">
+                <tr style="text-align: left;">
+                    <th>Họ và tên</th>
+                    <th>Chức danh</th>
+                    <th>Vị trí/ Nhiệm vụ</th>
+                </tr>
+                <tbody id="auditTeamTable">
+                    <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
+                </tbody>
+            </table>
+            <p style="margin: 0; font-weight: bold; ">2. Phạm vi công việc</span></p>
+            <p style="margin: 20px 0; ">Theo thỏa thuận, chúng tôi sẽ tiến hành kiểm toán Báo cáo tài
+                chính cho năm tài chính kết thúc ngày <span data-field="NamKiT"></span> nhằm đưa ra ý kiến liệu báo cáo
+                tài
+                chính có phản ánh
+                trung thực, hợp lý tình hình tài chính, kết quả kinh doanh và lưu chuyển tiền tệ của Công ty, phù hợp
+                với
+                Chuẩn mực kế toán Việt Nam, Chế độ kế toán doanh nghiệp Việt Nam và các quy định pháp lý có liên quan
+                đến
+                việc lập và trình bày báo cáo tài chính hay không. </p>
+            <b>Các công việc cụ thể mà chúng tôi sẽ thực hiện như sau:</b>
+            <p style="margin-left: 20px; text-align: justify;">
+            <p>● Tham gia chứng kiến kiểm kê tiền mặt, hàng tồn kho và tài sản cố định
+                của Công ty tại thời điểm cuối năm tài chính;</p>
+            <p>● Tìm hiểu Công ty và môi trường hoạt động bao gồm cả tìm hiểu kiểm soát
+                nội bộ và hệ thống kế toán;</p>
+            <p>● Thu thập các thông tin pháp lý, các quy định nội bộ và các tài liệu
+                quan trọng như: Điều lệ Công ty, Biên bản họp Hội đồng quản trị, Đại hội đồng cổ đông, Ban Giám đốc làm
+                cơ sở để kiểm toán các thông tin liên quan trên Báo cáo tài chính;</p>
+            <p>● Đánh giá các chính sách kế toán được áp dụng, các ước tính và xét đoán
+                quan trọng của Ban Giám đốc cũng như đánh giá việc trình bày tổng thể Báo cáo tài chính;</p>
+            <p>● Thực hiện kiểm tra các kiểm soát nội bộ và kiểm tra cơ bản đối với Báo cáo tài chính và các khoản
+                mục trình bày trên Báo cáo tài chính;</p>
+            <span>● <b>Trao đổi những vấn đề phát sinh cần xem xét, các bút toán cần điều chỉnh;</b></span><br>
+            <span>● <b>Tổng hợp và lập Báo cáo kiểm toán dự thảo trình bày ý kiến của Kiểm toán viên về tính trung thực,
+                    hợp lý của Báo cáo tài chính được kiểm toán. Phát hành Báo cáo kiểm toán chính thức sau khi nhận
+                    được ý kiến đồng ý của Ban Giám đốc.</b></span><br>
+
+            </p>
+            <p style="margin: 0; font-weight: bold; ">3. Thời gian dự kiến thực hiện kiểm toán</span></p>
+            <p style="margin-left: 20px; text-align: justify;">
+                <span>Chúng tôi dự kiến sẽ tham gia chứng kiến kiểm kê tại Công ty từ ngày <span
+                        data-field="TuNgayKiemToan"></span> đến
+                    <span data-field="DenNgayKiemToan"></span>.</span><br>
+                <span>Cuộc kiểm toán sẽ được thực hiện từ ngày <span data-field="NgayKiemToan"></span> tại văn phòng Quý
+                    Công ty và dự kiến kết thúc
+                    trong vòng sau (03) ngày làm việc. </span><br>
+                <span>Thời gian dự kiến phát hành báo cáo kiểm toán dự thảo là: <span
+                        data-field="NgayBaoCaoKiemToan"></span>.</span><br>
+            </p>
+            <p style="margin: 0; font-weight: bold; ">4. Yêu cầu phối hợp làm việc</span></p>
+            <p style="margin-left: 20px; text-align: justify;">
+                <span>Trong thời gian thực hiện kiểm toán, đề nghị Công ty tạo điều kiện thuận lợi cho các nhân
+                    viên
+                    của chúng tôi trong quá trình làm việc.</span><br>
+            </p>
+            <p style="margin: 0; font-weight: bold; ">5. Yêu cầu cung cấp tài liệu</span></p>
+            <p style="margin-left: 20px; text-align: justify;">
+                <span>Chúng tôi cũng gửi kèm theo kế hoạch này Danh mục tài liệu đề nghị Quý Công ty cung cấp. Các tài
+                    liệu
+                    trong phần A</span><br>
+                <span> - Tổng quát, cần được gửi cho chúng tôi trước ngày <span
+                        data-field="NgayGuiYeuCauCungCapTaiLieu"></span>, các tài liệu còn lại đề nghị gửi
+                    trước hoặc được cung cấp ngay khi chúng tôi bắt đầu thực hiện kiểm toán.</span><br>
+                <span> Nếu Quý vị có câu hỏi gì hoặc gợi ý gì khác về kế hoạch kiểm toán này, xin vui lòng liên hệ lại
+                    với
+                    chúng tôi. </span><br>
+                <span>Nếu Quý vị đồng ý với kế hoạch kiểm toán này, xin vui lòng ký xác nhận và fax lại cho chúng tôi để
+                    chúng tôi có thể tiến hành kịp thời gian yêu cầu.</span> <br>
+                <span>Thay mặt và đại diện cho Công ty,</span>
+
+            </p>
+
+            <table>
+                <tr>
+
+                    <td style=" padding: 5px 0; font-weight: bold;">
+                        <hr>
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <td style=" padding: 5px 0; font-weight: bold;">
+                        <b>Họ và Tên: Ông Nguyễn Huy Hoàng</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td style=" padding: 5px 0; ">
+                        Tổng Giám Đốc
+                    </td>
+                </tr>
+                <tr>
+                    <td style=" padding: 5px 0; font-weight: bold;">
+                        Công ty TNHH Kiểm toán IVC
+                    </td>
+                </tr>
+            </table>
+            <hr>
+            <p style="margin: 0; font-weight: bold; ">Xác nhận của <span data-field="TenKH"></span></span></p>
+            <p style="margin-left: 20px; text-align: justify;">
+                <span>Tôi đồng ý với nội dung của Kế hoạch kiểm toán trên đây do Công ty TNHH Kiểm toán IVC cung
+                    cấp.</span><br>
+            <table>
+                <tr>
+
+                    <td style=" padding: 5px 0; font-weight: bold;">
+                        <hr>
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <td style=" padding: 5px 0; font-weight: bold;">
+                        <b>Họ và Tên: <span data-field="NguoiDaiDienKH"></span></b>
+                    </td>
+                </tr>
+                <tr>
+                    <td style=" padding: 5px 0; ">
+                        Chức danh: <span data-field="ChucVuKH"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style=" padding: 5px 0; font-weight: bold;">
+                        <span data-field="TenKH"></span><br>
+                        <span data-field="TinhKh"></span>, <span data-field="ngayKhoach"></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
+    <script>
+
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+        const appId = '45324891-da90-4c7e-89cb-255d02772e29';
+        const accessKey = 'V2-ERBuT-OvzzD-vNJDC-ODMfm-BuZyK-7yfLe-XEsob-vFasR';
+        const region = 'www';
+        function editContent() {
+            $('#Conten').summernote({
+                height: '100vh',
+                width: '100%',
+                minWidth: 1200,
+                focus: true,
+                lang: 'vi-VN',
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                fontNames: ['Times New Roman'],
+                fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '24', '36'],
+                styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+                callbacks: {
+                    onInit: function () {
+                        document.querySelector('.save-button').style.display = 'block';
+                        document.querySelector('.edit-button').style.display = 'none';
+                        document.querySelector('.export-button').style.display = 'none';
+                        document.querySelector('.print-button').style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        async function saveContent() {
+            try {
+                document.querySelector('.loading-overlay').style.display = 'flex';
+
+                const contractId = getContractIdFromUrl();
+                if (!contractId) {
+                    throw new Error('Không tìm thấy ID kế hoạch');
+                }
+
+                const content = $('#Conten').summernote('code');
+
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Plan/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Action": "Edit",
+                        "Properties": {
+                            "Locale": "en-US",
+                            "TimeZone": "Asia/Bangkok"
+                        },
+                        "Rows": [{
+                            "ID_KHKT": contractId,
+                            "Html": content
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                $('#Conten').summernote('destroy');
+
+                document.getElementById('Conten').innerHTML = content;
+                document.querySelector('.save-button').style.display = 'none';
+                document.querySelector('.edit-button').style.display = 'block';
+                document.querySelector('.export-button').style.display = 'block';
+                document.querySelector('.print-button').style.display = 'block';
+
+                FuiToast.success('Thành công.')
+            } catch (error) {
+                FuiToast.error("Error toast message.")
+
+            } finally {
+                document.querySelector('.loading-overlay').style.display = 'none';
+            }
+        }
+        // Add this new function for printing
+        function printDocument() {
+            const printButton = document.querySelector('.print-button');
+            const exportButton = document.querySelector('.export-button');
+            const editContentButton = document.querySelector('.edit-button');
+
+
+            // Hide both buttons
+            if (printButton) printButton.style.display = 'none';
+            if (exportButton) exportButton.style.display = 'none';
+            if (editContentButton) editContentButton.style.display = 'none';
+
+            // Print the document
+            window.print();
+
+            // Show buttons again after printing
+            if (printButton) printButton.style.display = 'block';
+            if (exportButton) exportButton.style.display = 'block';
+            if (editContentButton) editContentButton.style.display = 'block';
+        }
+
+        // Add the export function
+        function exportToWord() {
+            // Lấy nội dung cần xuất (bỏ qua button xuất và scripts)
+            const content = document.body.cloneNode(true);
+            const exportButton = content.querySelector('.export-button');
+            if (exportButton) {
+                exportButton.remove();
+            }
+
+            const printButton = content.querySelector('.print-button');
+            if (printButton) {
+                printButton.remove();
+            }
+
+            const editbutton = content.querySelector('.edit-button');
+            if (editbutton) {
+                editbutton.remove();
+            }
+
+            const savebutton = content.querySelector('.save-button');
+            if (savebutton) {
+                savebutton.remove();
+            }
+
+            // Tạo style inline để giữ format
+            const css = `
+        body { font-family: 'Times New Roman', serif; }
+        h3 { margin: 0; }
+        .export-button { display: none; }
+    `;
+
+            // Tạo HTML tối giản
+            const html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+              xmlns:w='urn:schemas-microsoft-com:office:word'>
+        <head>
+            <meta charset='utf-8'>
+            <title>A230 - KẾ HOẠCH KIỂM TOÁN</title>
+            <style>${css}</style>
+        </head>
+        <body>
+            ${content.innerHTML}
+        </body>
+        </html>
+    `;
+
+            // Tạo blob với type phù hợp cho MS Word
+            const blob = new Blob([html], {
+                type: 'application/msword;charset=utf-8'
+            });
+
+            // Download file
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'ke-hoach-kiem-toan.doc';
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function formatVietnameseDate(dateString) {
+            const date = new Date(dateString);
+            return `ngày ${String(date.getDate()).padStart(2, '0')} tháng ${String(date.getMonth() + 1).padStart(2, '0')} năm ${date.getFullYear()}`;
+        }
+
+        function formatVietnameseDateshort(dateString) {
+            const date = new Date(dateString);
+            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+        }
+
+        function getContractIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('ID_KHKT');
+        }
+
+        async function fetchContractData() {
+            try {
+                const contractId = getContractIdFromUrl();
+                if (!contractId) {
+                    throw new Error('Không tìm thấy số hợp đồng trong URL');
+                }
+
+                // Fetch Plan data
+                const planResponse = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Plan/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: `Filter(Plan, ID_KHKT = '${contractId}')`
+                    })
+                });
+
+                // Fetch PlanChildren data
+                const planChildrenResponse = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/PlanChildren/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: `Filter(PlanChildren, ID_KHC = '${contractId}')`
+                    })
+                });
+
+                if (!planResponse.ok || !planChildrenResponse.ok) {
+                    throw new Error(`HTTP error!`);
+                }
+
+                const planData = await planResponse.json();
+                const planChildrenData = await planChildrenResponse.json();
+
+                const contract = planData.find(c => c.ID_KHKT === contractId);
+                if (!contract) {
+                    throw new Error(`Không tìm thấy hợp đồng với số: ${contractId}`);
+                }
+
+                // Render audit team table
+                if (planChildrenData && planChildrenData.length > 0) {
+                    renderAuditTeam(planChildrenData);
+                }
+                if (contract.Html && contract.Html.trim()) {
+                    document.getElementById('Conten').innerHTML = contract.Html;
+                } else {
+                    // Fill other fields...
+                    document.querySelectorAll('[data-field]').forEach(element => {
+                        const fieldName = element.getAttribute('data-field');
+                        if (contract[fieldName]) {
+
+                            if (fieldName === 'ngayKhoach') {
+                                element.textContent = formatVietnameseDate(contract[fieldName]);
+                            } else if (fieldName === 'TuNgayKiemToan' || fieldName === 'DenNgayKiemToan' || fieldName === 'NgayKiemToan' || fieldName === 'NgayBaoCaoKiemToan' || fieldName === 'NgayGuiYeuCauCungCapTaiLieu') {
+                                element.textContent = formatVietnameseDateshort(contract[fieldName]);
+                            } else if (fieldName === 'TenKH' && contract['MaKH']) {
+                                element.textContent = contract['TenKH'].toUpperCase();
+                            } else if (fieldName === 'VAT') {
+                                element.textContent = (contract[fieldName]) * 100 + '%';
+                            }
+                            else if (fieldName === 'GiaTriHopDongChuaVAT' || fieldName === 'TongGiaTriHopDong' || fieldName === 'GiaTriDaThucHien' || fieldName === 'GiaTriDaTamUng' || fieldName === 'GiaTriConLai') {
+                                element.textContent = formatVietnameseCurrency(contract[fieldName]);
+                            } else {
+                                element.textContent = contract[fieldName];
+                            }
+                        }
+                    });
+
+
+                }
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">
+            Lỗi khi tải dữ liệu: ${error.message}
+        </div>`;
+            }
+        }
+
+        function renderAuditTeam(planChildren) {
+            const tableBody = document.getElementById('auditTeamTable');
+            planChildren.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td>${member.HoVaTen}</td>
+            <td>${member.ChucDanh}</td>
+            <td>${member.Vitri_NhiemVu}</td>
+        `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        window.addEventListener('load', fetchContractData);
+    </script>
+</body>
+
+</html>
