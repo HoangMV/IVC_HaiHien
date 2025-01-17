@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>A211 - BIÊN BẢN NGHIỆM THU THANH LÝ HỢP ĐỒNG</title>
+    <!-- Thêm vào sau các style hiện có -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Summernote -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/css/toast@1.0.1/fuiToast.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/js/toast@1.0.1/fuiToast.min.js"></script>
+    <style>
+        .export-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 24px;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .export-button:hover {
+            background-color: #16a34a;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 160px;
+            padding: 10px 24px;
+            background-color: #14b8a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .print-button:hover {
+            background-color: #0d9488;
+        }
+
+        @media print {
+
+            .print-button,
+            .export-button {
+                display: none;
+            }
+        }
+
+        .save-button {
+            position: fixed !important;
+            top: 20px !important;
+            right: 400px !important;
+            z-index: 9999 !important;
+            padding: 10px 24px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .edit-button {
+            position: fixed;
+            top: 20px;
+            right: 275px;
+            padding: 10px 24px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body
+    style="font-family: 'Times New Roman', serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.4; font-size: 13pt;">
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    <div id="fui-toast"></div>
+
+    <button onclick="editContent()" class="action-button edit-button">Chỉnh sửa</button>
+    <button onclick="saveContent()" class="action-button save-button">Lưu lại</button>
+    <button onclick="printDocument()" class="action-button print-button">In nhanh</button>
+    <button onclick="exportToWord()" class="export-button">Xuất ra Word</button>
+    <div id="Conten">
+    <!-- Title -->
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td colspan="2">
+                <h3 style="text-align: center; margin: 0;">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <h3 style="text-align: center; margin: 0;">Độc lập - Tự do - Hạnh phúc</h3>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <p style="text-align: center; margin: 0;">------o0o------</p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: right;">
+                <p style="margin: 0;"><i>Hà Nội, <span data-field="NgayThanhLy"></span></i></p>
+            </td>
+        </tr>
+    </table>
+
+    <div style="text-align: center; margin: 20px 0;">
+        <h2 style="margin: 0;">BIÊN BẢN NGHIỆM THU THANH LÝ HỢP ĐỒNG</h2>
+        <i style="margin: 10px 0;">Số: <span data-field="SoThanhLy"></span>/TLHD-IVC</i>
+    </div>
+
+    <!-- Legal basis -->
+    <div style="margin-top: 20px;">
+        <i>● Căn cứ Bộ luật dân sự số 91/2015/QH13 ngày 24/11/2015;</i><br>
+        <i>● Căn cứ Luật thương mại số 36/2005/QH11 ngày 14/6/2005;</i><br>
+        <i>● Căn cứ Hợp đồng kiểm toán Số: <span data-field="SoHopDong"></span> <span data-field="NgayHopDong"></span>
+            giữa Bên A: <span data-field="TenKH"></span> và Bên
+            B: Công ty TNHH Kiểm toán IVC về việc <span data-field="NoiDungHopDong"></span> của <span
+                data-field="TenKH"></span>.</i>
+    </div>
+    <p style="margin: 20px 20px 0;">Biên bản này được lập vào <span data-field="NgayThanhLy"></span>,
+        giữa:</p>
+
+    <!-- Party A -->
+    <div style="margin-top: 25px;">
+        <p style="margin: 0; font-weight: bold;">BÊN A : <span data-field="TenKH"></span></p>
+        <table style="margin-left: 40px; border-collapse: collapse;">
+            <tr>
+                <td style="width: 120px; padding: 5px 0; font-weight: bold;">Người đại diện</td>
+                <td style="padding: 5px 0; font-weight: bold;"> : <span data-field="NguoiDaiDienKH"></span></td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Chức vụ</td>
+                <td style="padding: 5px 0;"> : <span data-field="ChucVuKH"></span></td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Địa chỉ</td>
+                <td style="padding: 5px 0;"> : <span data-field="DiaChiKH"></span></td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Mã số thuế</td>
+                <td style="padding: 5px 0;"> : <span data-field="MST_KH"></span></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Party B -->
+    <div style="margin-top: 25px;">
+        <p style="margin: 0; font-weight: bold; ">BÊN B: CÔNG TY TNHH KIỂM TOÁN IVC</p>
+        <table style="margin-left: 40px; border-collapse: collapse;">
+            <tr>
+                <td style="width: 120px; padding: 5px 0; font-weight: bold;">Người đại diện</td>
+                <td style="padding: 5px 0; font-weight: bold;"> : Ông Phạm Duy Hiệp</td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Chức vụ</td>
+                <td style="padding: 5px 0;"> : Phó Tổng Giám đốc</td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Địa chỉ</td>
+                <td style="padding: 5px 0;"> : Tầng 2, số 1 ngõ 2 Láng Hạ, phường Thành Công, quận Ba Đình, thành phố Hà
+                    Nội</td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Điện thoại</td>
+                <td style="padding: 5px 0;"> : 0943 863 073</td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Mã số thuế</td>
+                <td style="padding: 5px 0;"> : 0109564702</td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Tài khoản số</td>
+                <td style="padding: 5px 0;"> : 0909597168888</td>
+            </tr>
+            <tr>
+                <td style="width: 120px; padding: 5px 0;">Tại Ngân hàng</td>
+                <td style="padding: 5px 0;"> : Ngân hàng TMCP Quân Đội - CN Hoài Đức</td>
+            </tr>
+        </table>
+    </div>
+    <p style="margin: 20px 0;">Cùng nhau tiến hành thanh lý Hợp đồng kiểm toán số: <span data-field="SoHopDong"></span>
+        <span data-field="NgayHopDong"></span> với các nội dung sau:
+    </p>
+
+    <!-- Contract Implementation -->
+    <div style="margin-top: 20px;">
+        <h3 style="margin: 10px 0;">I - TÌNH HÌNH THỰC HIỆN HỢP ĐỒNG</h3>
+        <p style="margin: 10px 0; text-align: justify;">
+            Hai bên đã thực hiện đúng các điều khoản cam kết của Hợp đồng, Bên B đã bàn giao các Báo cáo kiểm toán về
+            Báo cáo tài chính cho Bên A.
+        </p>
+
+        <h3 style="margin: 20px 0 10px;">II - THANH TOÁN</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <th style="width: 10%; text-align: center; border-bottom: 1px solid black; padding: 5px;">STT</th>
+                <th style="width: 55%; text-align: left; border-bottom: 1px solid black; padding: 5px;">Nội dung</th>
+                <th style="width: 3%; text-align: right; padding: 5px;"></th>
+                <th style="width: 32%; text-align: left; border-bottom: 1px solid black; padding: 5px;">Số tiền (VND)
+                </th>
+            </tr>
+            <tr>
+                <td style="text-align: center;  padding: 5px;">1.</td>
+                <td style=" padding: 5px;">Giá trị hợp đồng đã ký</td>
+                <td style="text-align: right; padding: 5px;"></td>
+                <td style="text-align: left; padding: 5px;"><span data-field="GiaTriHopDongChuaVAT"></span></td>
+            </tr>
+            <tr>
+                <td style="text-align: center; padding: 5px;">2.</td>
+                <td style="padding: 5px;">VAT</td>
+                <td style="text-align: right; padding: 5px;"></td>
+                <td style="text-align: left; padding: 5px;"><span data-field="VAT"></span></td>
+            </tr>
+            <tr>
+                <td style="text-align: center; padding: 5px;">3.</td>
+                <td style="padding: 5px;">Tổng giá trị hợp đồng</td>
+                <td style="text-align: right; padding: 5px;"></td>
+                <td style="text-align: left; padding: 5px;"><span data-field="TongGiaTriHopDong"></span></td>
+            </tr>
+            <tr>
+                <td style="text-align: center; padding: 5px;">4.</td>
+                <td style="padding: 5px;">Giá trị đã thực hiện</td>
+                <td style="text-align: right; padding: 5px;"></td>
+                <td style="text-align: left; padding: 5px;"><span data-field="GiaTriDaThucHien"></span></td>
+            </tr>
+            <tr>
+                <td style="text-align: center; border-bottom: 1px solid black; padding: 5px;">5.</td>
+                <td style="border-bottom: 1px solid black; padding: 5px;">Giá trị đã tạm ứng</td>
+                <td style="text-align: right; padding: 5px;"></td>
+                <td style="text-align: left; border-bottom: 1px solid black; padding: 5px;"><span
+                        data-field="GiaTriDaTamUng"></span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center; border-bottom: 1px solid black; padding: 5px;">6.</td>
+                <td style="border-bottom: 1px solid black; padding: 5px;"><strong>Giá trị còn phải thanh toán</strong>
+                </td>
+                <td style="text-align: right; padding: 5px;"></td>
+                <td style="text-align: left; border-bottom: 1px solid black; padding: 5px;">
+                    <strong><span data-field="GiaTriConLai"></span></strong>
+                </td>
+            </tr>
+        </table>
+        <div id="amount-in-words"></div>
+
+
+        <p style="margin: 20px 0; text-align: justify;">
+            Bên A sẽ thanh toán số tiền còn lại sau 03 ngày kể từ khi hai bên ký kết Biên bản thanh lý này.
+        </p>
+
+        <p style="margin: 20px 0; text-align: justify;">
+            Biên bản thanh lý này được lập thành 02 (hai) bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản.
+        </p>
+    </div>
+
+    <!-- Signatures -->
+    <table style="width: 100%; margin-top: 50px; border-collapse: collapse;">
+        <tr>
+            <td style="width: 45%; text-align: center;">
+                <p style="font-weight: bold; margin: 10px 0;">ĐẠI DIỆN BÊN A</p>
+            </td>
+            <td style="width: 10%;"></td>
+            <td style="width: 45%; text-align: center;">
+                <p style="font-weight: bold; margin: 10px 0;">ĐẠI DIỆN BÊN B</p>
+            </td>
+        </tr>
+    </table>
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
+    <script>
+        function editContent() {
+            $('#Conten').summernote({
+                height: '100vh',
+                width: '100%',
+                minWidth: 1200,
+                focus: true,
+                lang: 'vi-VN',
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                fontNames: ['Times New Roman'],
+                fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '24', '36'],
+                callbacks: {
+                    onInit: function () {
+                        document.querySelector('.save-button').style.display = 'block';
+                        document.querySelector('.edit-button').style.display = 'none';
+                        document.querySelector('.export-button').style.display = 'none';
+                        document.querySelector('.print-button').style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        async function saveContent() {
+            try {
+                document.querySelector('.loading-overlay').style.display = 'flex';
+
+                const contractId = getContractIdFromUrl();
+                if (!contractId) {
+                    throw new Error('Không tìm thấy ID thanh lý');
+                }
+
+                const content = $('#Conten').summernote('code');
+
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Liquidations/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Action": "Edit",
+                        "Properties": {
+                            "Locale": "vi-VN",
+                            "Location": "Hanoi, Vietnam"
+                        },
+                        "Rows": [{
+                            "ID_SoThanhLy": contractId,
+                            "Html": content
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                $('#Conten').summernote('destroy');
+
+                document.getElementById('Conten').innerHTML = content;
+                document.querySelector('.save-button').style.display = 'none';
+                document.querySelector('.edit-button').style.display = 'block';
+                document.querySelector('.export-button').style.display = 'block';
+                document.querySelector('.print-button').style.display = 'block';
+                FuiToast.success('Đã lưu thành công')
+
+            } catch (error) {
+                FuiToast.error('Có lỗi xảy ra khi lưu: ' + error.message)
+            } finally {
+                document.querySelector('.loading-overlay').style.display = 'none';
+            }
+        }
+        
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+
+
+        const appId = '45324891-da90-4c7e-89cb-255d02772e29';
+        const accessKey = 'V2-ERBuT-OvzzD-vNJDC-ODMfm-BuZyK-7yfLe-XEsob-vFasR';
+        const region = 'www';
+
+        // Add this new function for printing
+        function printDocument() {
+            const printButton = document.querySelector('.print-button');
+            const exportButton = document.querySelector('.export-button');
+            const editContentButton = document.querySelector('.edit-button');
+
+
+            // Hide both buttons
+            if (printButton) printButton.style.display = 'none';
+            if (exportButton) exportButton.style.display = 'none';
+            if (editContentButton) editContentButton.style.display = 'none';
+
+            // Print the document
+            window.print();
+
+            // Show buttons again after printing
+            if (printButton) printButton.style.display = 'block';
+            if (exportButton) exportButton.style.display = 'block';
+            if (editContentButton) editContentButton.style.display = 'block';
+        }
+
+        // Add the export function
+        function exportToWord() {
+            // Lấy nội dung cần xuất (bỏ qua button xuất và scripts)
+            const content = document.body.cloneNode(true);
+            const exportButton = content.querySelector('.export-button');
+            if (exportButton) {
+                exportButton.remove();
+            }
+
+            const printButton = content.querySelector('.print-button');
+            if (printButton) {
+                printButton.remove();
+            }
+
+            const editbutton = content.querySelector('.edit-button');
+            if (editbutton) {
+                editbutton.remove();
+            }
+
+            const savebutton = content.querySelector('.save-button');
+            if (savebutton) {
+                savebutton.remove();
+            }
+
+            // Tạo style inline để giữ format
+            const css = `
+        body { font-family: 'Times New Roman', serif; }
+        h3 { margin: 0; }
+        .export-button { display: none; }
+    `;
+
+            // Tạo HTML tối giản
+            const html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+              xmlns:w='urn:schemas-microsoft-com:office:word'>
+        <head>
+            <meta charset='utf-8'>
+            <title>A211 - BIÊN BẢN NGHIỆM THU THANH LÝ HỢP ĐỒNG</title>
+            <style>${css}</style>
+        </head>
+        <body>
+            ${content.innerHTML}
+        </body>
+        </html>
+    `;
+
+            // Tạo blob với type phù hợp cho MS Word
+            const blob = new Blob([html], {
+                type: 'application/msword;charset=utf-8'
+            });
+
+            // Download file
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'thanh-li-hop-dong.doc';
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function formatVietnameseDate(dateString) {
+            const date = new Date(dateString);
+            return `ngày ${String(date.getDate()).padStart(2, '0')} tháng ${String(date.getMonth() + 1).padStart(2, '0')} năm ${date.getFullYear()}`;
+        }
+
+        function formatVietnameseCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount).replace('₫', 'VND');
+        }
+
+        function numberToVietnameseText(number) {
+            const UNITS = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ'];
+            const DIGITS = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+
+            function readThreeDigits(number) {
+                const hundreds = Math.floor(number / 100);
+                const tens = Math.floor((number % 100) / 10);
+                const ones = number % 10;
+
+                let result = '';
+
+                if (hundreds > 0) {
+                    result += DIGITS[hundreds] + ' trăm ';
+                    if (tens === 0 && ones > 0) {
+                        result += 'lẻ ';
+                    }
+                }
+
+                if (tens > 1) {
+                    result += DIGITS[tens] + ' mươi ';
+                    if (ones === 1) {
+                        result += 'mốt ';
+                    } else if (ones === 5) {
+                        result += 'lăm ';
+                    } else if (ones > 0) {
+                        result += DIGITS[ones] + ' ';
+                    }
+                } else if (tens === 1) {
+                    result += 'mười ';
+                    if (ones === 5) {
+                        result += 'lăm ';
+                    } else if (ones > 0) {
+                        result += DIGITS[ones] + ' ';
+                    }
+                } else if (ones > 0) {
+                    if (hundreds > 0) {
+                        if (ones === 5) {
+                            result += 'lăm ';
+                        } else {
+                            result += DIGITS[ones] + ' ';
+                        }
+                    } else {
+                        result += DIGITS[ones] + ' ';
+                    }
+                }
+
+                return result.trim();
+            }
+
+            if (!number) return 'Không đồng';
+
+            // Format the number first
+            const formattedNumber = new Intl.NumberFormat('vi-VN', {
+                maximumFractionDigits: 0,
+                minimumFractionDigits: 0
+            }).format(number);
+
+            // Remove all non-digit characters
+            const numStr = formattedNumber.replace(/\D/g, '');
+            const num = parseInt(numStr);
+
+            if (num === 0) return 'Không đồng';
+
+            const groups = [];
+            let tempNumber = Math.abs(num);
+
+            // Split into groups of three digits
+            while (tempNumber > 0) {
+                groups.push(tempNumber % 1000);
+                tempNumber = Math.floor(tempNumber / 1000);
+            }
+
+            let result = '';
+            let hasValue = false;
+
+            // Process each group
+            for (let i = groups.length - 1; i >= 0; i--) {
+                if (groups[i] !== 0) {
+                    const text = readThreeDigits(groups[i]);
+                    if (text) {
+                        result += text + ' ' + UNITS[i] + ' ';
+                        hasValue = true;
+                    }
+                } else if (i % 3 === 0 && hasValue) { // Add 'tỷ' for zero groups in billions
+                    result += UNITS[i] + ' ';
+                }
+            }
+
+            result = result.trim() + ' đồng';
+            return result.charAt(0).toUpperCase() + result.slice(1);
+        }
+
+        function getContractIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('ID_SoThanhLy');
+        }
+
+        async function fetchContractData() {
+            try {
+                const contractId = getContractIdFromUrl();
+                if (!contractId) {
+                    throw new Error('Không tìm thấy số hợp đồng trong URL');
+                }
+
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Liquidations/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: `Filter(Liquidations, ID_SoThanhLy = '${contractId}')`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const contract = data.find(c => c.ID_SoThanhLy === contractId);
+
+                if (!contract) {
+                    throw new Error(`Không tìm thấy hợp đồng với số: ${contractId}`);
+                }
+                if (contract.Html && contract.Html.trim()) {
+                    document.getElementById('Conten').innerHTML = contract.Html;
+                } else {
+                    document.querySelectorAll('[data-field]').forEach(element => {
+                        const fieldName = element.getAttribute('data-field');
+                        if (contract[fieldName]) {
+                            if (fieldName === 'GiaTriConLai') {
+                                element.textContent = formatVietnameseCurrency(contract[fieldName]);
+                                // Thêm số tiền bằng chữ
+                                const amountInWords = numberToVietnameseText(contract[fieldName]);
+                                document.querySelector('#amount-in-words').innerHTML = `<div style="margin-top: 5px; font-style: italic;">(Bằng chữ: ${amountInWords})</div>`;
+                            }
+
+
+                            if (fieldName === 'NgayThanhLy' || fieldName === 'NgayHopDong') {
+                                element.textContent = formatVietnameseDate(contract[fieldName]);
+                            } else if (fieldName === 'TenKH' && contract['MaKH']) {
+                                element.textContent = contract['TenKH'].toUpperCase();
+                            } else if (fieldName === 'VAT') {
+                                element.textContent = (contract[fieldName]) * 100 + '%';
+                            }
+                            else if (fieldName === 'GiaTriHopDongChuaVAT' || fieldName === 'TongGiaTriHopDong' || fieldName === 'GiaTriDaThucHien' || fieldName === 'GiaTriDaTamUng' || fieldName === 'GiaTriConLai') {
+                                element.textContent = formatVietnameseCurrency(contract[fieldName]);
+                            } else {
+                                element.textContent = contract[fieldName];
+                            }
+                        }
+                    });
+
+                }
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">
+                    Lỗi khi tải dữ liệu: ${error.message}
+                </div>`;
+            }
+        }
+
+        window.addEventListener('load', fetchContractData);
+
+    </script>
+</body>
+
+</html>
