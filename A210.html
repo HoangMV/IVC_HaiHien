@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hợp đồng kiểm toán</title>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Summernote -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/css/toast@1.0.1/fuiToast.min.css">
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/js/toast@1.0.1/fuiToast.min.js"></script>
+    <style>
+        .export-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 24px;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .export-button:hover {
+            background-color: #16a34a;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 160px;
+            padding: 10px 24px;
+            background-color: #14b8a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .print-button:hover {
+            background-color: #0d9488;
+        }
+
+        @media print {
+
+            .print-button,
+            .export-button,
+            .edit-button,
+            .save-button {
+                display: none;
+            }
+        }
+
+        .save-button {
+            position: fixed !important;
+            top: 20px !important;
+            right: 440px !important;
+            z-index: 9999 !important;
+            /* Đảm bảo nút luôn hiển thị trên cùng */
+        }
+
+        /* CSS cho loading spinner */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body style="font-family: 'Times New Roman', serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.4;">
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    <div id="fui-toast"></div>
+    <button onclick="printDocument()" class="action-button print-button">In nhanh</button>
+    <button onclick="exportToWord()" class="export-button">Xuất ra Word</button>
+    <button onclick="editContent()" class="action-button edit-button"
+        style="position: fixed; top: 20px; right: 275px; padding: 10px 24px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">Chỉnh
+        sửa</button>
+    <button onclick="saveContent()" class="action-button save-button"
+        style="position: fixed; top: 20px; right: 400px; padding: 10px 24px; background-color: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: none;">Lưu
+        lại</button>
+    <!-- Title -->
+    <div id="Conten">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td colspan="2">
+                    <h3 style="text-align: center; margin: 0;">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <h3 style="text-align: center; margin: 0;">Độc lập - Tự do - Hạnh phúc</h3>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <p style="text-align: center; margin: 0;">------o0o------</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+                    <p style="margin: 0;">Số: <span data-field="SoHopDong"></span></p>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%"></td>
+                <td style="width: 50%; text-align: right;">
+                    <p style="margin: 0;"><i>Hà Nội, <span data-field="NgayHopDong"></span></i></p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <h2 style="text-align: center; margin: 10px 0 0 0;">HỢP ĐỒNG KIỂM TOÁN</h2>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <p style="text-align: center; margin: 0;"><i>(V/v: <span data-field="NoiDungHopDong"></span>)</i>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <p style="text-align: center; margin: 0;">của <span data-field="TenKH"></span></p>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Legal basis -->
+        <br>
+        <i style="margin: 5px 0;">● Căn cứ Bộ luật dân sự số 91/2015/QH13 ngày 24/11/2015;</i> <br>
+        <i style="margin: 5px 0;">● Căn cứ Luật thương mại số 36/2005/QH11 ngày 14/6/2005;</i><br>
+        <i style="margin: 5px 0;">● Căn cứ Luật kiểm toán độc lập số 67/2011/QH12 ngày 29/3/2011;</i><br>
+        <i style="margin: 5px 0;">● Căn cứ Nghị định 17/2012/NĐ - CP ngày 13/3/2012 của Chính phủ quy định chi tiết và
+            hướng dẫn thi hành một số
+            điều của Luật kiểm toán độc lập;</i><br>
+        <i style="margin: 5px 0;">● Căn cứ Chuẩn mực kiểm toán Việt Nam số 210 về Hợp đồng kiểm toán;</i><br>
+        <i style="margin: 5px 0;">● Căn cứ vào yêu cầu của <span data-field="TenKH"></span>;</i><br>
+
+
+        <p style="margin-top: 20px;">Hôm nay, <span data-field="NgayHopDong"></span>, chúng tôi gồm có:</p>
+
+        <!-- Party A -->
+        <div style="margin-top: 20px;">
+            <p style="margin: 0; font-weight: bold;">BÊN A : <span data-field="TenKH"></span></p>
+            <table style="margin-left: 40px; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 120px; padding: 5px 0; font-weight: bold;">Người đại diện</td>
+                    <td style="padding: 5px 0; font-weight: bold;"> : <span data-field="NguoiDaiDienKH"></span></td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Chức vụ</td>
+                    <td style="padding: 5px 0;"> : <span data-field="ChucVuKH"></span></td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Địa chỉ</td>
+                    <td style="padding: 5px 0;"> : <span data-field="DiaChiKH"></span></td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Mã số thuế</td>
+                    <td style="padding: 5px 0;"> : <span data-field="MST_KH"></span></td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Tài khoản số</td>
+                    <td style="padding: 5px 0;"> : <span data-field="SoTK_NganHang"></span></td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Tại Ngân hàng</td>
+                    <td style="padding: 5px 0;"> : <span data-field="TaiNganHang"></span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Party B -->
+        <div style="margin-top: 25px;">
+            <p style="margin: 0; font-weight: bold; ">BÊN B: CÔNG TY TNHH KIỂM TOÁN IVC</p>
+            <table style="margin-left: 40px; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 120px; padding: 5px 0; font-weight: bold;">Người đại diện</td>
+                    <td style="padding: 5px 0; font-weight: bold;"> : Ông Phạm Duy Hiệp</td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Chức vụ</td>
+                    <td style="padding: 5px 0;"> : Phó Tổng Giám đốc</td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Địa chỉ</td>
+                    <td style="padding: 5px 0;"> : Tầng 2, số 1 ngõ 2 Láng Hạ, phường Thành Công, quận Ba Đình, thành
+                        phố Hà
+                        Nội</td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Điện thoại</td>
+                    <td style="padding: 5px 0;"> : 0943 863 073</td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Mã số thuế</td>
+                    <td style="padding: 5px 0;"> : 0109564702</td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Tài khoản số</td>
+                    <td style="padding: 5px 0;"> : 0909597168888</td>
+                </tr>
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Tại Ngân hàng</td>
+                    <td style="padding: 5px 0;"> : Ngân hàng TMCP Quân Đội - CN Hoài Đức</td>
+                </tr>
+            </table>
+        </div>
+
+
+        <p style="margin: 10px 20px 0;">Sau khi bàn bạc và thương lượng, hai bên cùng thỏa thuận ký kết hợp đồng gồm các
+            điều
+            khoản như sau:</p>
+
+        <!-- Contract Terms -->
+        <div style="margin-top: 20px; line-height: 1.6; text-align: justify;">
+            <h3 style="margin: 20px 0 10px 0; font-weight: bold;">ĐIỀU 1: NỘI DUNG HỢP ĐỒNG</h3>
+            <p style="margin: 10px 20px 0;">Bên B đồng ý cung cấp cho bên A dịch vụ <span
+                    data-field="NoiDungHopDong"></span>,
+                bao gồm Bảng cân đối kế
+                toán tại ngày <span data-field="NamKiT"></span>, Báo cáo kết quả hoạt động kinh doanh, Báo cáo lưu
+                chuyển
+                tiền tệ và Bản thuyết minh báo cáo tài chính cho năm tài chính kết thúc cùng ngày. Cuộc kiểm toán của
+                bên B
+                được thực hiện với mục tiêu đưa ra ý kiến kiểm toán về báo cáo tài chính của bên A. Báo cáo tài chính
+                kèm
+                theo báo cáo kiểm toán chỉ được bên A sử dụng cho mục đích quản trị và nộp cho các cơ quan chức năng
+                theo
+                quy định.</p>
+
+            <p style="margin: 10px 20px 0;">Báo cáo tài chính được lập phù hợp các Chuẩn mực kế toán Việt Nam, Chế độ kế
+                toán
+                doanh nghiệp Việt Nam và
+                các quy định pháp lý có liên quan đến việc lập và trình bày báo cáo tài chính.</p>
+
+            <p style="margin: 10px 20px 0;">Việc kiểm toán báo cáo tài chính cho năm tài chính kết thúc ngày <span
+                    data-field="NamKiT"></span>, Bên B
+                sẽ kiểm toán báo cáo tài chính của Bên A theo các Chuẩn mực kiểm toán Việt Nam.</p>
+
+            <h3 style="margin: 20px 0 10px 0; font-weight: bold;">ĐIỀU 2: TRÁCH NHIỆM CỦA CÁC BÊN</h3>
+            <p style="margin: 10px 0;"><i>Trách nhiệm của bên A:</i></p>
+
+            <p style="margin: 10px 20px 0;">Cuộc kiểm toán của bên B sẽ được thực hiện trên cơ sở Ban Giám đốc và những
+                người
+                chịu trách nhiệm về quản
+                trị doanh nghiệp (trong phạm vi phù hợp) của Bên A hiểu và thừa nhận có trách nhiệm:</p>
+
+            <ol type="a" style="margin-left: 20px; padding-left: 20px;">
+                <li style="margin: 10px 20px 0;">Đối với việc lập và trình bày báo cáo tài chính trung thực và hợp lý,
+                    phù
+                    hợp
+                    với các chuẩn mực kế toán
+                    Việt Nam, chế độ kế toán (doanh nghiệp) Việt Nam và các quy định pháp lý có liên quan đến lập và
+                    trình
+                    bày báo cáo tài chính được áp dụng;</li>
+
+                <li style="margin: 10px 20px 0;">Xây dựng và duy trì kiểm soát nội bộ mà Ban Giám đốc và Ban quản trị
+                    (trong
+                    phạm
+                    vi phù hợp) xác định là
+                    cần thiết để đảm bảo cho việc lập và trình bày báo cáo tài chính không còn sai sót trọng yếu do gian
+                    lận
+                    hoặc do nhầm lẫn;</li>
+
+                <li style="margin: 10px 20px 0;">Đảm bảo các sổ kế toán và chứng từ kế toán thích hợp được lưu giữ để
+                    phản
+                    ánh
+                    tình hình tài chính của
+                    Công ty, với mức độ chính xác hợp lý, tại bất kỳ thời điểm nào và đảm bảo rằng các sổ kế toán tuân
+                    thủ
+                    với chế độ kế toán đã được áp dụng;</li>
+
+                <li style="margin: 10px 20px 0;">Đảm bảo cung cấp kịp thời cho bên B:
+                    <ol type="i" style="list-style-type: lower-roman; margin-left: 20px; padding-left: 20px;">
+                        <li style="margin: 5px 0;">Quyền tiếp cận với tất cả tài liệu, thông tin mà Ban Giám đốc nhận
+                            thấy
+                            là có liên quan đến quá
+                            trình lập và trình bày báo cáo tài chính như chứng từ kế toán, sổ kế toán, tài liệu và các
+                            vấn
+                            đề khác;</li>
+                        <li style="margin: 5px 0;">Các thông tin bổ sung mà kiểm toán viên và doanh nghiệp kiểm toán yêu
+                            cầu
+                            Ban Giám đốc cung cấp
+                            hoặc giải trình để phục vụ cho mục đích của cuộc kiểm toán;</li>
+                        <li style="margin: 5px 0;">Quyền tiếp cận không hạn chế đối với nhân sự của bên A mà kiểm toán
+                            viên
+                            và doanh nghiệp kiểm
+                            toán xác định là cần thiết để thu thập bằng chứng kiểm toán. Bố trí nhân sự liên quan cùng
+                            làm
+                            việc với bên B trong quá trình kiểm toán.</li>
+                    </ol>
+                </li>
+            </ol>
+
+            <p style="margin: 10px 20px 0;">Việc Ban Giám đốc không thể cung cấp cho Bên B các thông tin được đề cập như
+                trên
+                hoặc quyền trao đổi với
+                nhân viên trong Công ty của Bên A có thể gây chậm hoàn thành công việc và phát hành báo cáo của Bên B,
+                và/hoặc thay đổi phạm vi các thủ tục kiểm toán, hoặc thậm chí dẫn tới việc Bên B chấm dứt cung cấp dịch
+                vụ.
+            </p>
+
+            <p style="margin: 10px 20px 0;">Ban Giám đốc và Ban quản trị (những người chịu trách nhiệm về quản trị doanh
+                nghiệp) của bên A (trong phạm vi phù hợp) có trách nhiệm cung cấp và xác nhận bằng văn bản về các giải
+                trình
+                đã cung cấp trong quá trình kiểm toán vào “Thư giải trình của Ban Giám đốc và Ban quản trị”, một trong
+                những
+                yêu cầu của chuẩn mực kiểm toán Việt Nam, trong đó nêu rõ trách nhiệm của Ban Giám đốc bên A trong việc
+                lập
+                và trình bày báo cáo tài chính và khẳng định rằng ảnh hưởng của từng sai sót, cũng như tổng hợp các sai
+                sót
+                không được điều chỉnh do bên B phát hiện và tổng hợp trong quá trình kiểm toán cho kỳ hiện tại và các
+                sai
+                sót liên quan đến các kỳ trước là không trọng yếu đối với tổng thể báo cáo tài chính.
+            </p>
+
+            <p style="margin: 10px 20px 0;">Tạo điều kiện thuận tiện cho các nhân viên của bên B trong quá trình làm
+                việc
+                tại Văn phòng của bên A.</p>
+
+            <p style="margin: 10px 20px 0;">Thanh toán đầy đủ phí dịch vụ kiểm toán và các phí khác (nếu có) cho bên B
+                theo
+                quy định tại Điều 4 của hợp đồng này.</p>
+
+            <p style="margin: 10px 0;"><i>Trách nhiệm của bên B:</i></p>
+
+            <p style="margin: 10px 20px 0;">Bên B sẽ thực hiện công việc kiểm toán theo các chuẩn mực kiểm toán Việt
+                Nam,
+                pháp luật và các quy định có liên quan. Các chuẩn mực kiểm toán này quy định bên B phải tuân thủ chuẩn
+                mực
+                và các quy định về đạo đức nghề nghiệp, phải lập kế hoạch và thực hiện cuộc kiểm toán để đạt được sự đảm
+                bảo
+                hợp lý về việc liệu báo cáo tài chính, xét trên phương diện tổng thể, có còn sai sót trọng yếu hay
+                không.
+                Trong cuộc kiểm toán, bên B sẽ thực hiện các thủ tục để thu thập bằng chứng kiểm toán về số liệu và
+                thông
+                tin trình bày trong báo cáo tài chính. Các thủ tục được thực hiện tùy thuộc vào đánh giá của kiểm toán
+                viên,
+                bao gồm việc đánh giá rủi ro có sai sót trọng yếu trong báo cáo tài chính do gian lận hoặc do nhầm lẫn.
+                Cuộc
+                kiểm toán cũng bao gồm việc đánh giá sự phù hợp của các chính sách kế toán đã được sử dụng và các ước
+                tính
+                kế toán của Ban Giám đốc, cũng như đánh giá việc trình bày tổng thể của báo cáo tài chính.</p>
+
+            <p style="margin: 10px 20px 0;">Bên B có trách nhiệm thông báo cho bên A về nội dung và kế hoạch kiểm toán,
+                cử
+                kiểm toán viên và các trợ lý có năng lực và kinh nghiệm thực hiện kiểm toán.</p>
+
+            <p style="margin: 10px 20px 0;">Bên B thực hiện công việc kiểm toán theo nguyên tắc độc lập, khách quan và
+                bảo
+                mật số liệu. Theo đó bên B không được quyền tiết lộ cho bất kỳ một bên thứ ba nào mà không có sự đồng ý
+                của
+                bên A, ngoại trừ theo yêu cầu của pháp luật và các quy định có liên quan, hoặc trong trường hợp những
+                thông
+                tin như trên đã được các cơ quan quản lý Nhà nước phổ biến rộng rãi hoặc đã được bên A công bố. </p>
+
+            <p style="margin: 10px 20px 0;">Bên B có trách nhiệm yêu cầu bên A xác nhận các giải trình đã cung cấp cho
+                bên B
+                trong quá trình thực hiện kiểm toán. Theo chuẩn mực kiểm toán Việt Nam, việc đáp ứng các yêu cầu này và
+                Thư
+                giải trình của Ban Giám đốc và Ban quản trị bên A về những vấn đề liên quan là một trong những cơ sở để
+                bên
+                B đưa ra ý kiến của mình về báo cáo tài chính của bên A.</p>
+            <p style="margin: 10px 20px 0;">Do những hạn chế vốn có của kiểm toán cũng như của kiểm soát nội bộ, có rủi
+                ro
+                khó tránh khỏi là kiểm toán viên có thể không phát hiện được các sai sót trọng yếu, mặc dù cuộc kiểm
+                toán đã
+                được lập kế hoạch và thực hiện theo các chuẩn mực kiểm toán Việt Nam.</p>
+
+            <p style="margin: 10px 20px 0;">Để đánh giá rủi ro, bên B sẽ xem xét kiểm soát nội bộ mà bên A sử dụng trong
+                quá
+                trình lập báo cáo tài chính để thiết kế các thủ tục kiểm toán phù hợp trong từng trường hợp, nhưng không
+                nhằm mục đích đưa ra ý kiến về tính hữu hiệu của kiểm soát nội bộ của bên A. Tuy nhiên, bên B sẽ thông
+                báo
+                tới bên A bằng văn bản về các khiếm khuyết nghiêm trọng trong kiểm soát nội bộ mà bên B phát hiện được
+                trong
+                quá trình kiểm toán báo cáo tài chính.</p>
+
+
+            <h3 style="margin: 20px 0 10px 0; font-weight: bold;">ĐIỀU 3: BÁO CÁO KIỂM TOÁN</h3>
+            <p style="margin: 10px 20px 0; text-align: justify;">Sau khi kết thúc kiểm toán, bên B sẽ cung cấp cho bên A
+                bốn
+                (04)
+                bộ báo cáo kiểm toán kèm theo báo cáo tài
+                chính đã được kiểm toán bằng tiếng Việt.</p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Báo cáo kiểm toán sẽ được lập bằng văn bản, gồm các nội
+                dung
+                theo quy định của Luật kiểm toán độc lập, Chuẩn
+                mực kiểm toán Việt Nam số 700, số 705 và số 706, các chuẩn mực kiểm toán và quy định pháp lý khác có
+                liên
+                quan.</p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Bên A có quyền và trách nhiệm trong việc sử dụng báo
+                cáo
+                kiểm
+                toán theo mục đích đã nêu tại Điều 1 của Hợp
+                đồng này.</p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Trong trường hợp bên A dự định phát hành báo cáo kiểm
+                toán
+                của
+                bên B dưới bất kỳ dạng tài liệu nào, hoặc phát
+                hành các tài liệu trong đó có các thông tin về báo cáo tài chính đã được kiểm toán, Ban Giám đốc bên A
+                đồng
+                ý rằng họ sẽ cung cấp cho bên B một bản của tài liệu này và chỉ phổ biến rộng rãi các tài liệu này sau
+                khi
+                có sự đồng ý của bên B bằng văn bản.</p>
+
+            <h3 style="margin: 20px 0 10px 0; font-weight: bold;">ĐIỀU 4: PHÍ DỊCH VỤ VÀ PHƯƠNG THỨC THANH TOÁN</h3>
+            <p style="margin: 10px 40px 0"><strong>Phí dịch vụ</strong></p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Tổng phí dịch vụ cho các dịch vụ nêu tại Điều 1 là:
+                <span data-field="PhiChuaVAT"></span> (<span data-field="SoTienBangChu"></span>)
+            </p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Phí dịch vụ đã bao gồm toàn bộ các chi phí ăn, ở, đi
+                lại và
+                phụ
+                phí khác, và chưa bao gồm thuế GTGT.</p>
+
+            <p style="margin: 10px 40px 0;"><strong>Điều khoản thanh toán</strong></p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Lần 1: Tạm ứng 50% trong vòng 05 ngày làm việc kể từ
+                ngày
+                ký hợp
+                đồng</p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Lần 2: Thanh toán 50% còn lại trong vòng 05 ngày làm
+                việc
+                sau khi
+                Bên B phát hành Báo cáo kiểm toán cho Bên
+                A.</p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Phí kiểm toán sẽ được thanh toán bằng chuyển khoản trực
+                tiếp vào
+                tài khoản của Bên B.</p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Bên B sẽ phát hành hóa đơn GTGT cho bên A phù hợp với
+                quy
+                định
+                của pháp luật thuế hiện hành</p>
+
+            <h3 style="margin: 20px 0 10px 0; font-weight: bold;">ĐIỀU 5: CAM KẾT THỰC HIỆN</h3>
+            <p style="margin: 10px 20px 0; text-align: justify;">Hai Bên cam kết thực hiện tất cả các điều khoản đã ghi
+                trong Hợp
+                đồng. Trong quá trình thực hiện, nếu phát
+                sinh vướng mắc, hai Bên phải kịp thời thông báo cho nhau để cùng tìm phương án giải quyết. Mọi thay đổi
+                phải
+                được thông báo trực tiếp cho mỗi bên bằng văn bản (hoặc qua email) theo địa chỉ trên đây.</p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Thời gian hoàn thành cuộc kiểm toán dự kiến là 30 ngày
+                kể
+                từ
+                ngày bắt đầu thực hiện cuộc kiểm toán với điều
+                kiện bên A thực hiện đầy đủ các trách nhiệm của mình đã nêu tại Điều 2 ở trên, trong đó bao gồm Bên A đã
+                cung cấp đầy đủ thông tin, tài liệu theo yêu cầu của Bên B và thống nhất hướng giải quyết các vấn đề
+                phát
+                sinh trong quá trình kiểm toán.</p>
+            <p style="margin: 10px 20px 0; text-align: justify;">Mọi tranh chấp hoặc khiếu kiện phát sinh trong quá
+                trình
+                thực
+                hiện hợp đồng sẽ được giải quyết bằng thương
+                lượng hoặc theo Bộ luật dân sự nước Cộng hoà xã hội chủ nghĩa Việt Nam và tại tòa án kinh tế do hai bên
+                lựa
+                chọn.</p>
+
+            <h3 style="margin: 20px 0 10px 0; font-weight: bold;">ĐIỀU 6: HIỆU LỰC, NGÔN NGỮ VÀ THỜI HẠN HỢP ĐỒNG</h3>
+            <p style="margin: 10px 20px 0; text-align: justify;">Hợp đồng này được lập thành 04 bản bằng tiếng Việt, mỗi
+                Bên
+                giữ
+                02 bản, và có hiệu lực kể từ ngày có đủ chữ
+                ký, con dấu của hai Bên.</p>
+
+            <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 45%; text-align: center;">
+                        <p style="font-weight: bold; margin: 10px 0;">ĐẠI DIỆN BÊN A</p>
+                    </td>
+                    <td style="width: 10%;"></td>
+                    <td style="width: 45%; text-align: center;">
+                        <p style="font-weight: bold; margin: 10px 0;">ĐẠI DIỆN BÊN B</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
+    <script>
+        let editor;
+        function editContent() {
+            $('#Conten').summernote({
+                height: '100vh',
+                width: '100%',
+                minWidth: 1200,
+                focus: true, // Tự động focus khi mở editor
+                lang: 'vi-VN', // Thêm ngôn ngữ tiếng Việt
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                fontNames: ['Times New Roman'],
+                fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '24', '36'],
+                styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+                popover: {
+                    table: [
+                        ['add', ['addRowDown', 'addRowUp', 'addColLeft', 'addColRight']],
+                        ['delete', ['deleteRow', 'deleteCol', 'deleteTable']],
+                    ],
+                },
+                callbacks: {
+                    onInit: function () {
+                        document.querySelector('.save-button').style.display = 'block';
+                        document.querySelector('.edit-button').style.display = 'none';
+                        document.querySelector('.export-button').style.display = 'none';
+                        document.querySelector('.print-button').style.display = 'none';
+
+                    },
+                    onChange: function (contents) {
+                        // Thêm auto-save
+                        localStorage.setItem('draft-content', contents);
+                    }
+                }
+            });
+        }
+        async function saveContent() {
+            try {
+                // Show loading overlay
+                document.querySelector('.loading-overlay').style.display = 'flex';
+
+                const contractId = getContractIdFromUrl();
+                if (!contractId) {
+                    throw new Error('Không tìm thấy ID hợp đồng');
+                }
+
+                // Get content from Summernote
+                const content = $('#Conten').summernote('code');
+
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Contracts/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Action": "Edit",
+                        "Properties": {
+                            "Locale": "en-US",
+                            "TimeZone": "Asia/Bangkok"
+                        },
+                        "Rows": [{
+                            "ID_HopDong": contractId,
+                            "Html": content
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Destroy Summernote editor
+                $('#Conten').summernote('destroy');
+
+                // Update content and show buttons
+                document.getElementById('Conten').innerHTML = content;
+                document.querySelector('.save-button').style.display = 'none';
+                document.querySelector('.edit-button').style.display = 'block';
+                document.querySelector('.export-button').style.display = 'block';
+                document.querySelector('.print-button').style.display = 'block';
+
+                FuiToast.success('Lưu thành công')
+
+
+            } catch (error) {
+                console.error('Lỗi khi lưu:', error);
+                FuiToast.error("Error toast message.")
+
+            } finally {
+                // Hide loading overlay
+                document.querySelector('.loading-overlay').style.display = 'none';
+            }
+        }
+
+
+
+        const appId = '45324891-da90-4c7e-89cb-255d02772e29';
+        const accessKey = 'V2-ERBuT-OvzzD-vNJDC-ODMfm-BuZyK-7yfLe-XEsob-vFasR';
+        const region = 'www';
+
+        // Add this new function for printing
+        function printDocument() {
+            const printButton = document.querySelector('.print-button');
+            const exportButton = document.querySelector('.export-button');
+            const editContentButton = document.querySelector('.edit-button');
+
+
+            // Hide both buttons
+            if (printButton) printButton.style.display = 'none';
+            if (exportButton) exportButton.style.display = 'none';
+            if (editContentButton) editContentButton.style.display = 'none';
+
+            // Print the document
+            window.print();
+
+            // Show buttons again after printing
+            if (printButton) printButton.style.display = 'block';
+            if (exportButton) exportButton.style.display = 'block';
+            if (editContentButton) editContentButton.style.display = 'block';
+        }
+
+        // Add the export function
+        function exportToWord() {
+            // Lấy nội dung cần xuất (bỏ qua button xuất và scripts)
+            const content = document.body.cloneNode(true);
+            const exportButton = content.querySelector('.export-button');
+            if (exportButton) {
+                exportButton.remove();
+            }
+
+            const printButton = content.querySelector('.print-button');
+            if (printButton) {
+                printButton.remove();
+            }
+
+            const editbutton = content.querySelector('.edit-button');
+            if (editbutton) {
+                editbutton.remove();
+            }
+
+            const savebutton = content.querySelector('.save-button');
+            if (savebutton) {
+                savebutton.remove();
+            }
+
+            // Tạo style inline để giữ format
+            const css = `
+        body { font-family: 'Times New Roman', serif; }
+        h3 { margin: 0; }
+        .export-button { display: none; }
+    `;
+
+            // Tạo HTML tối giản
+            const html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+              xmlns:w='urn:schemas-microsoft-com:office:word'>
+        <head>
+            <meta charset='utf-8'>
+            <title>Hợp đồng kiểm toán</title>
+            <style>${css}</style>
+        </head>
+        <body>
+            ${content.innerHTML}
+        </body>
+        </html>
+    `;
+
+            // Tạo blob với type phù hợp cho MS Word
+            const blob = new Blob([html], {
+                type: 'application/msword;charset=utf-8'
+            });
+
+            // Download file
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'hop-dong-kiem-toan.doc';
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function formatVietnameseDate(dateString) {
+            const date = new Date(dateString);
+            return `ngày ${String(date.getDate()).padStart(2, '0')} tháng ${String(date.getMonth() + 1).padStart(2, '0')} năm ${date.getFullYear()}`;
+        }
+
+        function formatVietnameseCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount).replace('₫', 'đồng');
+        }
+
+        function getContractIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('ID_HopDong');
+        }
+
+        async function fetchContractData() {
+            try {
+                const contractId = getContractIdFromUrl();
+                if (!contractId) {
+                    throw new Error('Không tìm thấy số hợp đồng trong URL');
+                }
+
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Contracts/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: `Filter(Contracts, ID_HopDong = '${contractId}')`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const contract = data.find(c => c.ID_HopDong === contractId);
+
+                if (!contract) {
+                    throw new Error(`Không tìm thấy hợp đồng với số: ${contractId}`);
+                }
+
+                // Kiểm tra nếu có dữ liệu HTML được lưu trữ
+                if (contract.Html && contract.Html.trim()) {
+                    // Nếu có, render nội dung HTML đã lưu
+                    document.getElementById('Conten').innerHTML = contract.Html;
+                } else {
+                    // Nếu không có, điền dữ liệu vào template mặc định
+                    document.querySelectorAll('[data-field]').forEach(element => {
+                        const fieldName = element.getAttribute('data-field');
+                        if (contract[fieldName]) {
+                            if (fieldName === 'NgayHopDong') {
+                                element.textContent = formatVietnameseDate(contract[fieldName]);
+                            } else if (fieldName === 'TenKH' && contract['MaKH']) {
+                                element.textContent = contract['TenKH'].toUpperCase();
+                            } else if (fieldName === 'PhiChuaVAT') {
+                                element.textContent = formatVietnameseCurrency(contract[fieldName]);
+                            } else {
+                                element.textContent = contract[fieldName];
+                            }
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">
+            Lỗi khi tải dữ liệu: ${error.message}
+        </div>`;
+            }
+        }
+        window.addEventListener('load', fetchContractData);
+    </script>
+</body>
+
+</html>
