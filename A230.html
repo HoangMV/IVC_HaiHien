@@ -153,12 +153,12 @@
         </table>
 
         <div style="text-align: center; margin: 20px 0;">
-            <h4 style="margin: 0;">KẾ HOẠCH KIỂM TOÁN BCTC <br>
+            <h4 style="margin: 0;  font-weight: bold;">KẾ HOẠCH KIỂM TOÁN BCTC <br>
                 CHO NĂM TÀI CHÍNH KẾT THÚC NGÀY <span data-field="NamKiT"></span>
             </h4>
 
         </div>
-        <table style="width: 100%; border-collapse: collapse;">
+        <table style="width: 100%; border-collapse: collapse; font-weight: bold;">
 
             <tr>
                 <td colspan="2" style="text-align: left;">
@@ -171,7 +171,7 @@
         </table>
 
         <div style="text-align: center; margin: 20px 0;">
-            <h5 style="margin: 0;"><span data-field="TenKH"></span><br>
+            <h5 style="margin: 0; font-weight: bold;"><span data-field="TenKH"></span><br>
                 <span data-field="DiaChiKH"></span>
             </h5>
 
@@ -525,84 +525,65 @@
 
         async function fetchContractData() {
             try {
-                const contractId = getContractIdFromUrl();
+                const contractId = getContractIdFromUrl(); // Lấy ID_KHKT từ URL
                 if (!contractId) {
                     throw new Error('Không tìm thấy số hợp đồng trong URL');
                 }
 
-                // Fetch Plan data
+                // Gọi API để lấy dữ liệu bảng chính (Plan)
                 const planResponse = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Plan/Action`, {
                     method: 'POST',
                     headers: {
                         'ApplicationAccessKey': accessKey,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         Action: 'Find',
                         Properties: {},
-                        Selector: `Filter(Plan, ID_KHKT = '${contractId}')`
-                    })
+                        Selector: `Filter(Plan, ID_KHKT = '${contractId}')`,
+                    }),
                 });
 
-                // Fetch PlanChildren data
+                // Gọi API để lấy dữ liệu bảng con (PlanChildren)
                 const planChildrenResponse = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/PlanChildren/Action`, {
                     method: 'POST',
                     headers: {
                         'ApplicationAccessKey': accessKey,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         Action: 'Find',
                         Properties: {},
-                        Selector: `Filter(PlanChildren, ID_KHC = '${contractId}')`
-                    })
+                        Selector: `Filter(PlanChildren, ID_KHKT = '${contractId}')`, // Đảm bảo điều kiện lọc
+                    }),
                 });
 
+
                 if (!planResponse.ok || !planChildrenResponse.ok) {
-                    throw new Error(`HTTP error!`);
+                    throw new Error('Lỗi khi tải dữ liệu từ API.');
                 }
 
                 const planData = await planResponse.json();
                 const planChildrenData = await planChildrenResponse.json();
 
-                const contract = planData.find(c => c.ID_KHKT === contractId);
-                if (!contract) {
-                    throw new Error(`Không tìm thấy hợp đồng với số: ${contractId}`);
-                }
-
-                // Render audit team table
+                // Hiển thị dữ liệu bảng con
                 if (planChildrenData && planChildrenData.length > 0) {
                     renderAuditTeam(planChildrenData);
                 }
-                if (contract.Html && contract.Html.trim()) {
-                    document.getElementById('Conten').innerHTML = contract.Html;
-                } else {
-                    // Fill other fields...
-                    document.querySelectorAll('[data-field]').forEach(element => {
-                        const fieldName = element.getAttribute('data-field');
-                        if (contract[fieldName]) {
 
-                            if (fieldName === 'ngayKhoach') {
-                                element.textContent = formatVietnameseDate(contract[fieldName]);
-                            } else if (fieldName === 'TuNgayKiemToan' || fieldName === 'DenNgayKiemToan' || fieldName === 'NgayKiemToan' || fieldName === 'NgayBaoCaoKiemToan' || fieldName === 'NgayGuiYeuCauCungCapTaiLieu') {
-                                element.textContent = formatVietnameseDateshort(contract[fieldName]);
-                            } else if (fieldName === 'TenKH' && contract['MaKH']) {
-                                element.textContent = contract['TenKH'].toUpperCase();
-                            } else if (fieldName === 'VAT') {
-                                element.textContent = (contract[fieldName]) * 100 + '%';
-                            }
-                            else if (fieldName === 'GiaTriHopDongChuaVAT' || fieldName === 'TongGiaTriHopDong' || fieldName === 'GiaTriDaThucHien' || fieldName === 'GiaTriDaTamUng' || fieldName === 'GiaTriConLai') {
-                                element.textContent = formatVietnameseCurrency(contract[fieldName]);
-                            } else {
-                                element.textContent = contract[fieldName];
-                            }
-                        }
-                    });
-
-
+                // Cập nhật dữ liệu bảng chính nếu cần
+                const contract = planData.find((c) => c.ID_KHKT === contractId);
+                if (!contract) {
+                    throw new Error(`Không tìm thấy hợp đồng với ID: ${contractId}`);
                 }
+                document.querySelectorAll('[data-field]').forEach((element) => {
+                    const fieldName = element.getAttribute('data-field');
+                    if (contract[fieldName]) {
+                        element.textContent = contract[fieldName];
+                    }
+                });
             } catch (error) {
-                console.error('Failed to fetch data:', error);
+                console.error('Lỗi khi tải dữ liệu:', error);
                 document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">
             Lỗi khi tải dữ liệu: ${error.message}
         </div>`;
@@ -611,7 +592,14 @@
 
         function renderAuditTeam(planChildren) {
             const tableBody = document.getElementById('auditTeamTable');
-            planChildren.forEach(member => {
+            tableBody.innerHTML = ''; // Xóa nội dung cũ
+
+            // Lọc dữ liệu theo ID_KHKT từ URL
+            const contractId = getContractIdFromUrl();
+            const filteredData = planChildren.filter(member => member.ID_KHKT === contractId);
+
+            // Hiển thị dữ liệu sau khi lọc
+            filteredData.forEach(member => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
             <td>${member.HoVaTen}</td>
@@ -620,7 +608,17 @@
         `;
                 tableBody.appendChild(row);
             });
+
+            // Kiểm tra nếu không có dữ liệu phù hợp
+            if (filteredData.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+            <td colspan="3" style="text-align: center;">Không có dữ liệu phù hợp</td>
+        `;
+                tableBody.appendChild(emptyRow);
+            }
         }
+
 
         window.addEventListener('load', fetchContractData);
     </script>
