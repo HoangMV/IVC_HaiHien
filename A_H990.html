@@ -13,9 +13,11 @@
     <!-- Summernote -->
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/css/toast@1.0.1/fuiToast.min.css">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/js/toast@1.0.1/fuiToast.min.js"></script>
-    
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/css/toast@1.0.1/fuiToast.min.css">
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/js/toast@1.0.1/fuiToast.min.js"></script>
+
     <style>
         .export-button {
             position: fixed;
@@ -170,14 +172,16 @@
             </tr>
         </table>
         <div style="text-align: center; margin: 20px 0;">
-            <h4 style="margin: 0;"><span data-field="TenKH"></span><br>
+            <h4 style="margin: 0; font-weight: bold;"><span data-field="TenKH"></span>
+            </h4>
+            <h4 style="margin: 0;">
                 <span data-field="DiaChiKH"></span>
             </h4>
 
         </div>
         <hr>
         <div style="text-align: center; margin: 20px 0;">
-            <h3 style="margin: 0;">GIẤY ĐỀ NGHỊ TẠM ỨNG
+            <h3 style="margin: 0; font-weight: bold;">GIẤY ĐỀ NGHỊ TẠM ỨNG
             </h3>
 
         </div>
@@ -623,7 +627,7 @@
                             else if (fieldName === 'NgayHopDong') {
                                 element.textContent = formatVietnameseDateshort(contract[fieldName]);
                             }
-                            else if (fieldName === 'TenKH' && contract['MaKH']) {
+                            else if (fieldName === 'TenKH') {
                                 element.textContent = contract['TenKH'].toUpperCase();
                             }
                             else if (fieldName === 'VAT') {
