@@ -669,7 +669,7 @@
 
                             if (fieldName === 'NgayThanhLy' || fieldName === 'NgayHopDong') {
                                 element.textContent = formatVietnameseDate(contract[fieldName]);
-                            } else if (fieldName === 'TenKH' && contract['MaKH']) {
+                            } else if (fieldName === 'TenKH') {
                                 element.textContent = contract['TenKH'].toUpperCase();
                             } else if (fieldName === 'VAT') {
                                 element.textContent = (contract[fieldName]) * 100 + '%';
