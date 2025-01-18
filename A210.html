@@ -769,7 +769,7 @@
                         if (contract[fieldName]) {
                             if (fieldName === 'NgayHopDong') {
                                 element.textContent = formatVietnameseDate(contract[fieldName]);
-                            } else if (fieldName === 'TenKH' && contract['MaKH']) {
+                            } else if (fieldName === 'TenKH') {
                                 element.textContent = contract['TenKH'].toUpperCase();
                             } else if (fieldName === 'PhiChuaVAT') {
                                 element.textContent = formatVietnameseCurrency(contract[fieldName]);
