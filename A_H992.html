@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>H992 - BÀN GIAO TÀI LIỆU</title>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Summernote -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/css/toast@1.0.1/fuiToast.min.css">
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/js/toast@1.0.1/fuiToast.min.js"></script>
+
+    <style>
+        .export-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 24px;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .export-button:hover {
+            background-color: #16a34a;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 160px;
+            padding: 10px 24px;
+            background-color: #14b8a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .print-button:hover {
+            background-color: #0d9488;
+        }
+
+        @media print {
+
+            .print-button,
+            .export-button {
+                display: none;
+            }
+        }
+
+        .save-button {
+            position: fixed !important;
+            top: 20px !important;
+            right: 400px !important;
+            z-index: 9999 !important;
+            padding: 10px 24px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .edit-button {
+            position: fixed;
+            top: 20px;
+            right: 275px;
+            padding: 10px 24px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body
+    style="font-family: 'Times New Roman', serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.4; font-size: 13pt;">
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    <div id="fui-toast"></div>
+
+    <button onclick="editContent()" class="action-button edit-button">Chỉnh sửa</button>
+    <button onclick="saveContent()" class="action-button save-button" style="display: none;">Lưu lại</button>
+    <button onclick="printDocument()" class="action-button print-button">In nhanh</button>
+    <button onclick="exportToWord()" class="export-button">Xuất ra Word</button>
+
+    <div id="Conten">
+        <!-- Title -->
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td>
+                    <h4 style="text-align: center; margin: 0;">CÔNG TY TNHH KIỂM TOÁN IVC</h4>
+                </td>
+                <td>
+                    <h4 style="text-align: center; margin: 0;">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM</h4>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h4 style="text-align: center; margin: 0;">Số <span data-field="SoBB"></span></h4>
+                </td>
+                <td>
+                    <h4 style="text-align: center; margin: 0;">Độc lập - Tự do - Hạnh phúc</h4>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+
+                </td>
+                <td style="text-align: center;">
+                    <br>
+                    <p style="margin: 0;"><i>Hà Nội, <span data-field="NgayBB"></span></i></p>
+                </td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <h2 style="margin: 0; font-weight: bold;">BÀN GIAO TÀI LIỆU</h2>
+        </div>
+
+        <!-- Legal basis -->
+        <div style="margin-top: 25px;">
+            <p style="margin: 0; font-weight: bold; ">Bên giao: CÔNG TY TNHH KIỂM TOÁN IVC</p>
+            <table style="margin-left: 40px; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 120px; padding: 5px 0; ">Họ tên:</td>
+                    <td style="padding: 5px 0; "> <span data-field="BenGiao_HoTen"></span></td>
+                </tr>
+
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Số điện thoại:</td>
+                    <td style="padding: 5px 0;"> <span data-field="BenGiao_SDT"></span></td>
+                </tr>
+
+            </table>
+        </div>
+        <!-- Party A -->
+        <div style="margin-top: 25px;">
+            <p style="margin: 0; font-weight: bold; ">Bên nhận: <span data-field="TenKH"></span></p>
+            <table style="margin-left: 40px; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 120px; padding: 5px 0; ">Họ tên:</td>
+                    <td style="padding: 5px 0; "> <span data-field="BenNhan_HoTen"></span></td>
+                </tr>
+
+                <tr>
+                    <td style="width: 120px; padding: 5px 0;">Số điện thoại:</td>
+                    <td style="padding: 5px 0;"> <span data-field="BenNhan_SDT"></span></td>
+                </tr>
+
+            </table>
+        </div>
+        <p style="margin: 0; font-weight: bold; ">Chi tiết tài liệu bàn giao:</p>
+        <!-- Party B -->
+        <table style="width: 100%; border-collapse: collapse; margin: 25px 0; border: 1px solid black;">
+            <tr>
+                <th style="border: 1px solid black; text-align: center;">STT</th>
+                <th style="border: 1px solid black; text-align: center;">Nội dung</th>
+                <th style="border: 1px solid black; text-align: center;">Số lượng</th>
+                <th style="border: 1px solid black; text-align: center;">Ghi chú</th>
+            </tr>
+            <tbody id="auditTeamTable">
+                <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
+            </tbody>
+        </table>
+        <p style="margin-left: 20px; text-align: justify;">
+            <span>Khi nhận được tài liệu nêu trên, Quý vị vui lòng thông báo lại cho kiểm toán viên của chúng tôi (Mr
+                <span data-field="BenGiao_HoTen"></span> , số điện thoại <span data-field="BenGiao_SDT"></span>). Quý vị
+                vui lòng ký, đóng dấu hồ sơ và chuyển lại cho
+                kiểm toán viên của chúng tôi số bản lưu theo như nội dung Ghi chú theo địa chỉ: </span><br>
+            <span>+ Công ty TNHH Kiểm toán IVC</span><br>
+            <span>+ Địa chỉ: Tầng 2, số 1 ngõ 2 Láng Hạ, phường Thành Công, quận Ba Đình, thành phố Hà Nội.</span><br>
+            <span>Xin chân thành cảm ơn!</span><br>
+        </p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
+    <script>
+
+        function editContent() {
+            $('#Conten').summernote({
+                height: '100vh',
+                width: '100%',
+                minWidth: 1200,
+                focus: true,
+                lang: 'vi-VN',
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                fontNames: ['Times New Roman'],
+                fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '24', '36'],
+                styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+                callbacks: {
+                    onInit: function () {
+                        document.querySelector('.save-button').style.display = 'block';
+                        document.querySelector('.edit-button').style.display = 'none';
+                        document.querySelector('.export-button').style.display = 'none';
+                        document.querySelector('.print-button').style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        async function saveContent() {
+            try {
+                document.querySelector('.loading-overlay').style.display = 'flex';
+
+                const contractId = getContractIdFromUrl();
+                if (!contractId) {
+                    throw new Error('Không tìm thấy ID đề nghị tạm ứng');
+                }
+
+                const content = $('#Conten').summernote('code');
+
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/DeliveryRecords/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "Action": "Edit",
+                        "Properties": {
+                            "Locale": "en-US",
+                            "TimeZone": "Asia/Bangkok"
+                        },
+                        "Rows": [{
+                            "ID_BB": contractId,
+                            "Html": content
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                $('#Conten').summernote('destroy');
+
+                document.getElementById('Conten').innerHTML = content;
+                document.querySelector('.save-button').style.display = 'none';
+                document.querySelector('.edit-button').style.display = 'block';
+                document.querySelector('.export-button').style.display = 'block';
+                document.querySelector('.print-button').style.display = 'block';
+                FuiToast.success('Đã lưu thành công')
+
+            } catch (error) {
+                FuiToast.error('Có lỗi xảy ra khi lưu: ' + error.message)
+            } finally {
+                document.querySelector('.loading-overlay').style.display = 'none';
+            }
+        }
+
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+
+        const appId = '45324891-da90-4c7e-89cb-255d02772e29';
+        const accessKey = 'V2-ERBuT-OvzzD-vNJDC-ODMfm-BuZyK-7yfLe-XEsob-vFasR';
+        const region = 'www';
+
+        // Add this new function for printing
+        function printDocument() {
+            const printButton = document.querySelector('.print-button');
+            const exportButton = document.querySelector('.export-button');
+            const editContentButton = document.querySelector('.edit-button');
+
+
+            // Hide both buttons
+            if (printButton) printButton.style.display = 'none';
+            if (exportButton) exportButton.style.display = 'none';
+            if (editContentButton) editContentButton.style.display = 'none';
+
+            // Print the document
+            window.print();
+
+            // Show buttons again after printing
+            if (printButton) printButton.style.display = 'block';
+            if (exportButton) exportButton.style.display = 'block';
+            if (editContentButton) editContentButton.style.display = 'block';
+        }
+
+        // Add the export function
+        function exportToWord() {
+            // Lấy nội dung cần xuất (bỏ qua button xuất và scripts)
+            const content = document.body.cloneNode(true);
+            const exportButton = content.querySelector('.export-button');
+            if (exportButton) {
+                exportButton.remove();
+            }
+
+            const printButton = content.querySelector('.print-button');
+            if (printButton) {
+                printButton.remove();
+            }
+
+            const editbutton = content.querySelector('.edit-button');
+            if (editbutton) {
+                editbutton.remove();
+            }
+
+            const savebutton = content.querySelector('.save-button');
+            if (savebutton) {
+                savebutton.remove();
+            }
+
+            // Tạo style inline để giữ format
+            const css = `
+        body { font-family: 'Times New Roman', serif; }
+        h3 { margin: 0; }
+        .export-button { display: none; }
+    `;
+
+            // Tạo HTML tối giản
+            const html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+              xmlns:w='urn:schemas-microsoft-com:office:word'>
+        <head>
+            <meta charset='utf-8'>
+            <title>H990 - ĐỀ NGHỊ TẠM ỨNG</title>
+            <style>${css}</style>
+        </head>
+        <body>
+            ${content.innerHTML}
+        </body>
+        </html>
+    `;
+
+            // Tạo blob với type phù hợp cho MS Word
+            const blob = new Blob([html], {
+                type: 'application/msword;charset=utf-8'
+            });
+
+            // Download file
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'de-nghi-tam-ung.doc';
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function formatVietnameseDate(dateString) {
+            const date = new Date(dateString);
+            return `ngày ${String(date.getDate()).padStart(2, '0')} tháng ${String(date.getMonth() + 1).padStart(2, '0')} năm ${date.getFullYear()}`;
+        }
+
+        function formatVietnameseDateshort(dateString) {
+            const date = new Date(dateString);
+            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+        }
+
+        function getContractIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('ID_BB');
+        }
+
+        async function fetchContractData() {
+            try {
+                const contractId = getContractIdFromUrl(); // Lấy ID_BB từ URL
+                if (!contractId) {
+                    throw new Error('Không tìm thấy số hợp đồng trong URL');
+                }
+
+                // Gọi API để lấy dữ liệu bảng chính (DeliveryRecords)
+                const DeliveryRecordsResponse = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/DeliveryRecords/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: `Filter(DeliveryRecords, ID_BB = '${contractId}')`,
+                    }),
+                });
+
+                // Gọi API để lấy dữ liệu bảng con (DeliveryRecordsChilden)
+                const DeliveryRecordsChildenResponse = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/DeliveryRecordsChilden/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: `Filter(DeliveryRecordsChilden, ID_BB = '${contractId}')`, // Đảm bảo điều kiện lọc
+                    }),
+                });
+
+
+                if (!DeliveryRecordsResponse.ok || !DeliveryRecordsChildenResponse.ok) {
+                    throw new Error('Lỗi khi tải dữ liệu từ API.');
+                }
+
+                const DeliveryRecordsData = await DeliveryRecordsResponse.json();
+                const DeliveryRecordsChildenData = await DeliveryRecordsChildenResponse.json();
+
+                // Hiển thị dữ liệu bảng con
+                if (DeliveryRecordsChildenData && DeliveryRecordsChildenData.length > 0) {
+                    renderAuditTeam(DeliveryRecordsChildenData);
+                }
+
+                // Cập nhật dữ liệu bảng chính nếu cần
+                const contract = DeliveryRecordsData.find((c) => c.ID_BB === contractId);
+                if (!contract) {
+                    throw new Error(`Không tìm thấy hợp đồng với ID: ${contractId}`);
+                }
+                document.querySelectorAll('[data-field]').forEach((element) => {
+                    const fieldName = element.getAttribute('data-field');
+                    if (contract[fieldName]) {
+                        if (fieldName === 'NgayBB') {
+                            element.textContent = formatVietnameseDate(contract[fieldName]);
+                        }
+                        else if (fieldName === 'TenKH') {
+                            element.textContent = contract['TenKH'].toUpperCase();
+                        }
+                        else {
+                            element.textContent = contract[fieldName];
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+                document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">
+            Lỗi khi tải dữ liệu: ${error.message}
+        </div>`;
+            }
+        }
+
+        function renderAuditTeam(DeliveryRecordsChilden) {
+            const tableBody = document.getElementById('auditTeamTable');
+            tableBody.innerHTML = ''; // Xóa nội dung cũ
+
+            // Lọc dữ liệu theo ID_BB từ URL
+            const contractId = getContractIdFromUrl();
+            const filteredData = DeliveryRecordsChilden.filter(member => member.ID_BB === contractId);
+
+            // Hiển thị dữ liệu sau khi lọc
+            filteredData.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td style="border: 1px solid black; text-align: center;">${member.STT}</td>
+            <td style="border: 1px solid black; text-align: center;">${member['Nội dung']}</td>
+            <td style="border: 1px solid black; text-align: center;">${member['Số lượng']}</td>
+            <td style="border: 1px solid black; text-align: center;">${member['Ghi chú']}</td>
+        `;
+                tableBody.appendChild(row);
+            });
+
+            // Kiểm tra nếu không có dữ liệu phù hợp
+            if (filteredData.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+            <td colspan="3" style="text-align: center;">Không có dữ liệu phù hợp</td>
+        `;
+                tableBody.appendChild(emptyRow);
+            }
+        }
+
+
+        window.addEventListener('load', fetchContractData);
+    </script>
+</body>
+
+</html>
