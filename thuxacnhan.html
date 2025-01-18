@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>THƯ XÁC NHẬN</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: 'Times New Roman', serif;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 8px;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        table {
+            margin-bottom: 2px;
+        }
+
+        tr {
+            height: 20px;
+        }
+
+        h3 {
+            margin: 5px 0;
+        }
+
+        .header-table {
+            margin-bottom: 5px;
+        }
+
+        .content-table td {
+            padding: 2px 4px;
+        }
+
+        .signature-section {
+            margin-top: 5px;
+        }
+
+        .confirmation-section {
+            margin-top: 5px;
+            border-top: 1px solid black;
+            padding-top: 5px;
+        }
+
+        @media print {
+
+            .print-button,
+            .export-button,
+            .edit-button,
+            .guide-button,
+            .save-button {
+                display: none;
+            }
+        }
+
+        /* Button styles */
+        .action-button {
+            position: fixed;
+            padding: 8px 20px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .print-button {
+            top: 20px;
+            right: 160px;
+            background-color: #14b8a6;
+        }
+
+        .export-button {
+            top: 20px;
+            right: 20px;
+            background-color: #22c55e;
+        }
+
+        .guide-button {
+            top: 20px;
+            right: 300px;
+            background-color: #0ea5e9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .sample-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        .sample-table th,
+        .sample-table td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .download-sample {
+            display: inline-block;
+            margin: 10px 0;
+            padding: 8px 16px;
+            background-color: #22c55e;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .download-sample:hover {
+            background-color: #16a34a;
+        }
+    </style>
+</head>
+
+<body>
+    <button onclick="window.print()" class="action-button print-button">In nhanh</button>
+    <button onclick="handleExcelClick()" class="action-button export-button">Nhập từ excel</button>
+    <button onclick="openGuide()" class="action-button guide-button">Hướng dẫn</button>
+    <table style="width: 100%;" class="header-table">
+        <tr>
+            <td style="text-align: left;"><i>Công ty Cổ phần Việt Pháp Victory</i></td>
+            <td style="text-align: right;"><i>Hà Nội, Ngày {{ngay}} tháng {{thang}} năm {{nam}}</i></td>
+        </tr>
+    </table>
+
+    <div style="text-align: center; margin: 5px 0;">
+        <h3><b>THƯ XÁC NHẬN PHẢI THU KHÁCH HÀNG</b></h3>
+    </div>
+
+    <table style="width: 100%;" class="content-table " style="vertical-align: top;">
+        <tr>
+            <td style="width: 15%;"><b>Kính gửi:</b></td>
+            <td><b>{{TenCty}}</b></td>
+        </tr>
+        <tr>
+            <td><b>Địa chỉ:</b></td>
+            <td><b>{{DiaChi}}</b></td>
+        </tr>
+        <tr>
+            <td><b>Số điện thoại:</b></td>
+            <td><b>{{SDT}}</b></td>
+        </tr>
+    </table>
+
+    <p>Kính thưa Quý vị,</p>
+    <p><b><i>Về việc: Xác nhận số dư nợ cho mục đích kiểm toán</i></b></p>
+
+    <p style="text-align: justify;"><b>Công ty TNHH Kiểm toán IVC</b> đang thực hiện kiểm toán Báo cáo tài chính cho năm
+        tài chính kết thúc ngày
+        <b>{{ngay}}/{{thang}}/{{nam}}</b> của Công ty chúng tôi. Báo cáo tài chính của chúng tôi đã phản ánh số dư liên
+        quan đến tài khoản của Quý vị như sau:
+    </p>
+
+    <p style="text-align: right;"><i>Đơn vị tính: VND</i></p>
+
+    <table border="1" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <th style="width: 70%; height: 5px; padding: 5px;"></th>
+            <td style="text-align: right; height: 10px; padding: 10px;"><b>{{ngay}}/{{thang}}/{{nam}}</b></td>
+        </tr>
+        <tr>
+            <td style="height: 5px; font-size: 13pt;">Số tiền Quý vị phải trả chúng tôi</td>
+            <td style="text-align: right; height: 5px; padding: 5px;"><b>{{Sotienphaitra}}</b></td>
+        </tr>
+        <tr>
+            <td style="height: 5px;  font-size: 13pt;">Số tiền Quý vị đã ứng trước cho chúng tôi</td>
+            <td style="text-align: right; height: 5px; padding: 5px;"><b>{{Sotiendaung}}</b></td>
+        </tr>
+    </table>
+
+    <p>Nhằm mục đích kiểm toán báo cáo tài chính của chúng tôi, rất mong Quý vị xác nhận tính đúng đắn của số dư nêu
+        trên và gửi thư xác nhận này <b>trực tiếp đến kiểm toán viên của chúng tôi</b> theo địa chỉ sau:</p>
+
+    <b>CÔNG TY TNHH KIỂM TOÁN IVC</b>
+    <table style="width: 100%; font-size: 10pt; font-weight: bold;">
+        <tr>
+            <td style="width: 15%;">Địa chỉ</td>
+            <td>: Số 1, ngõ 2 Láng Hạ, phường Thành Công, quận Ba Đình, thành phố Hà Nội</td>
+        </tr>
+        <tr>
+            <td>Người nhận</td>
+            <td>: Ông Phạm Duy Hiệp</td>
+        </tr>
+        <tr>
+            <td>Email</td>
+            <td>: duyhiep@ivcvietnam.com</td>
+        </tr>
+        <tr>
+            <td>Số điện thoại</td>
+            <td>: (84) 967 384 789</td>
+        </tr>
+    </table>
+
+    <p style="text-align: justify; ">Nếu không đồng ý với số dư nêu trên, xin Quý vị cung cấp đầy đủ chi tiết của sự
+        khác biệt cho kiểm toán viên của
+        chúng tôi.</p>
+    <p style="text-align: justify; font-weight: bold"><u>Lưu ý:</u> Tất cả các xác nhận qua email hoặc phương tiện điện
+        tử khác phải có bản chính/hoặc xác nhận bản gốc được
+        gửi bằng đường bưu điện.</p>
+    <p style="text-align: justify; font-weight: bold">Nếu bên phản hồi thư xác nhận là cá nhân, Quý Ông/bà vui lòng đính
+        kèm bản phản hồi thư xác nhận này bản sao giấy
+        tờ tùy thân như chứng minh nhân dân hoặc thẻ căn cước công dân.</p>
+    <p>Xin cảm ơn sự hợp tác của Quý vị.</p>
+    <p>Kính thư,</p>
+
+    <div class="signature-section" style="text-align: left;;">
+        <br>
+        <br>
+        <p><i>(Chữ ký, họ tên, chức danh, đóng dấu)</i></p>
+    </div>
+
+    <div class="confirmation-section">
+        <p style="font-style: italic; font-weight: bold;">Xác nhận của Công ty TNHH Clean Mountain Việt Nam</p>
+        <table style="width: 100%;">
+            <tr>
+                <td style="width: 70%;">Chúng tôi xác nhận các số dư nêu trên là <b>Đúng</b></td>
+                <td><input type="checkbox" style="width: 15px; height: 15px;"></td>
+            </tr>
+            <tr>
+                <td>Chúng tôi xác nhận các số dư nêu trên là <b>Không đúng</b></td>
+                <td><input type="checkbox" style="width: 15px; height: 15px;"></td>
+            </tr>
+        </table>
+        <p>Chi tiết về các khoản chênh lệch như sau:<br>
+            <i>(đính kèm bảng chi tiết nếu không đủ chỗ trống để trình bày chi tiết)</i>
+        </p>
+        <table style="width: 100%;">
+            <tr>
+                <td style="width: 70%;"></td>
+                <td>
+                    Chữ ký:<br><br>
+                    <i>Đóng dấu</i><br>
+                    Họ tên/Chức vụ:
+                </td>
+            </tr>
+        </table>
+    </div>
+    <!-- Thêm modal hướng dẫn -->
+    <div id="guideModal" class="modal">
+        <div class="modal-content">
+           
+            <h2>Hướng dẫn sử dụng</h2>
+
+            <h3>1. Nhập dữ liệu từ Excel</h3>
+            <p>- Click nút "Nhập từ excel" để import dữ liệu</p>
+            <p>- Chọn file Excel (.xlsx hoặc .xls) theo mẫu sau:</p>
+            <table class="sample-table" border="1">
+                <tr>
+                    <th>TenCty</th>
+                    <th>DiaChi</th>
+                    <th>SDT</th>
+                    <th>ngay</th>
+                    <th>thang</th>
+                    <th>nam</th>
+                    <th>Sotienphaitra</th>
+                    <th>Sotiendaung</th>
+                </tr>
+                <tr>
+                    <td>Công ty ABC</td>
+                    <td>123 Street</td>
+                    <td>0123456789</td>
+                    <td>18</td>
+                    <td>1</td>
+                    <td>2025</td>
+                    <td>1000000</td>
+                    <td>500000</td>
+                </tr>
+            </table>
+            <a href="#" class="download-sample" onclick="downloadSample()">Tải file mẫu</a>
+
+            <h3>2. In ấn</h3>
+            <p>- Click nút "In nhanh" để in tất cả các trang</p>
+            <p>- Mỗi dòng trong file Excel sẽ tạo ra một trang A4</p>
+
+            <h3>3. Truyền tham số qua URL</h3>
+            <p>- Bạn có thể truyền dữ liệu trực tiếp qua URL với cấu trúc sau:</p>
+            <code class="url-sample">
+                url?ngay=18<br>
+                &thang=1<br>
+                &nam=2025<br>
+                &TenCty=ABC<br>
+                &DiaChi=123%20Street<br>
+                &SDT=0123456789<br>
+                &Sotienphaitra=1000000<br>
+                &Sotiendaung=500000#<br>
+    </code>
+            <p><b>Lưu ý:</b></p>
+            <ul>
+                <li>Các tham số được ngăn cách bởi dấu &</li>
+                <li>Khoảng trắng trong địa chỉ sẽ tự động được mã hóa</li>
+        </div>
+    </div>
+    <script>
+        // Hàm để lấy parameters từ URL
+        function getUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const params = {
+                ngay: urlParams.get('ngay') || '',
+                thang: urlParams.get('thang') || '',
+                nam: urlParams.get('nam') || '',
+                TenCty: urlParams.get('TenCty') || '',
+                DiaChi: urlParams.get('DiaChi') || '',
+                SDT: urlParams.get('SDT') || '',
+                Sotienphaitra: urlParams.get('Sotienphaitra') || '',
+                Sotiendaung: urlParams.get('Sotiendaung') || ''
+            };
+            return params;
+        }
+
+        // Hàm để thay thế các biến trong template
+        function replaceTemplateVariables(data) {
+            const content = document.body.innerHTML;
+            for (const [key, value] of Object.entries(data)) {
+                const regex = new RegExp(`{{${key}}}`, 'g');
+                document.body.innerHTML = document.body.innerHTML.replace(regex, value);
+            }
+        }
+        function openGuide() {
+            document.getElementById('guideModal').style.display = 'block';
+        }
+
+       
+
+        // Đóng modal khi click bên ngoài
+        window.onclick = function (event) {
+            if (event.target == document.getElementById('guideModal')) {
+                document.getElementById('guideModal').style.display = 'none';
+            }
+        }
+
+        // Hàm tạo và download file Excel mẫu
+        function downloadSample() {
+            const wb = XLSX.utils.book_new();
+            const wsData = [
+                ['TenCty', 'DiaChi', 'SDT', 'ngay', 'thang', 'nam', 'Sotienphaitra', 'Sotiendaung'],
+                ['Công ty ABC', '123 Street', '0123456789', '18', '1', '2025', '1000000', '500000'],
+                ['Công ty XYZ', '456 Road', '0987654321', '18', '1', '2025', '2000000', '800000']
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+            XLSX.writeFile(wb, 'mau_import.xlsx');
+        }
+        // Hàm xử lý import Excel
+        // Hàm xử lý khi click vào nút import Excel
+        function handleExcelClick() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx, .xls';
+            input.onchange = function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    handleExcelImport(file);
+                }
+            };
+            input.click();
+        }
+
+        // Hàm xử lý import Excel
+        function handleExcelImport(file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                // Lưu lại template gốc (chỉ lấy phần nội dung chính, không bao gồm buttons)
+                const templateContent = document.querySelector('body').innerHTML;
+
+                // Tạo div container để chứa tất cả các trang
+                let newContent = '';
+
+                // Tạo từng trang cho mỗi dòng dữ liệu
+                jsonData.forEach((row, index) => {
+                    // Copy template cho mỗi trang
+                    let pageContent = templateContent;
+
+                    // Thay thế các biến trong trang này
+                    for (const [key, value] of Object.entries(row)) {
+                        let displayValue = value;
+                        // Format tiền cho các trường số tiền
+                        if (key === 'Sotienphaitra' || key === 'Sotiendaung') {
+                            displayValue = formatCurrency(value);
+                        }
+                        const regex = new RegExp(`{{${key}}}`, 'g');
+                        pageContent = pageContent.replace(regex, displayValue);
+                    }
+
+                    // Thêm page break sau mỗi trang (trừ trang cuối)
+                    if (index < jsonData.length - 1) {
+                        newContent += `<div style="page-break-after: always">${pageContent}</div>`;
+                    } else {
+                        newContent += pageContent;
+                    }
+                });
+
+                // Cập nhật nội dung
+                document.body.innerHTML = newContent;
+
+                // Thêm lại các buttons
+                const buttonContainer = document.createElement('div');
+                buttonContainer.innerHTML = `
+            <button onclick="window.print()" class="action-button print-button">In nhanh</button>
+            <button onclick="handleExcelClick()" class="action-button export-button">Nhập từ excel</button>
+        `;
+                document.body.insertBefore(buttonContainer, document.body.firstChild);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function formatCurrency(number) {
+            if (!number) return '';
+            return new Intl.NumberFormat('vi-VN').format(number);
+        }
+
+
+        // Khởi tạo khi trang load
+        window.onload = function () {
+            // Xử lý parameters từ URL nếu có
+            const urlParams = getUrlParameters();
+            if (Object.values(urlParams).some(value => value !== '')) {
+                replaceTemplateVariables(urlParams);
+            }
+            // Không cần thêm event listener ở đây nữa vì đã có onclick="handleExcelClick()" trong HTML
+        };
+
+        // Format số tiền thành định dạng VND
+        // Hàm format tiền VND
+        function formatCurrency(number) {
+            if (!number) return '';
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Khi thay thế giá trị từ Excel hoặc URL
+        function replaceTemplateVariables(data) {
+            const content = document.body.innerHTML;
+            for (const [key, value] of Object.entries(data)) {
+                const regex = new RegExp(`{{${key}}}`, 'g');
+                let displayValue = value;
+
+                // Format tiền cho các trường số tiền
+                if (key === 'Sotienphaitra' || key === 'Sotiendaung') {
+                    displayValue = formatCurrency(value);
+                }
+
+                document.body.innerHTML = document.body.innerHTML.replace(regex, displayValue);
+            }
+        }
+    </script>
+</body>
+
+</html>
