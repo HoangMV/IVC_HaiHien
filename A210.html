@@ -298,12 +298,8 @@
                     bày báo cáo tài chính được áp dụng;</li>
 
                 <li style="margin: 10px 20px 0;">Xây dựng và duy trì kiểm soát nội bộ mà Ban Giám đốc và Ban quản trị
-                    (trong
-                    phạm
-                    vi phù hợp) xác định là
-                    cần thiết để đảm bảo cho việc lập và trình bày báo cáo tài chính không còn sai sót trọng yếu do gian
-                    lận
-                    hoặc do nhầm lẫn;</li>
+                    (trong phạm vi phù hợp) xác định là cần thiết để đảm bảo cho việc lập và trình bày báo cáo tài chính
+                    không còn sai sót trọng yếu do gian lận hoặc do nhầm lẫn;</li>
 
                 <li style="margin: 10px 20px 0;">Đảm bảo các sổ kế toán và chứng từ kế toán thích hợp được lưu giữ để
                     phản
@@ -450,7 +446,7 @@
             <h3 style="margin: 20px 0 10px 0; font-weight: bold;">ĐIỀU 4: PHÍ DỊCH VỤ VÀ PHƯƠNG THỨC THANH TOÁN</h3>
             <p style="margin: 10px 40px 0"><strong>Phí dịch vụ</strong></p>
             <p style="margin: 10px 20px 0; text-align: justify;">Tổng phí dịch vụ cho các dịch vụ nêu tại Điều 1 là:
-                <span data-field="PhiChuaVAT"></span> (<span data-field="SoTienBangChu"></span>)
+                <span data-field="PhiChuaVAT"></span> <span id="amount-in-words"></span>
             </p>
             <p style="margin: 10px 20px 0; text-align: justify;">Phí dịch vụ đã bao gồm toàn bộ các chi phí ăn, ở, đi
                 lại và
@@ -719,7 +715,99 @@
                 currency: 'VND',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
-            }).format(amount).replace('₫', 'đồng');
+            }).format(amount).replace('₫', 'VND');
+        }
+
+        function numberToVietnameseText(number) {
+            const UNITS = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ'];
+            const DIGITS = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+
+            function readThreeDigits(number) {
+                const hundreds = Math.floor(number / 100);
+                const tens = Math.floor((number % 100) / 10);
+                const ones = number % 10;
+
+                let result = '';
+
+                if (hundreds > 0) {
+                    result += DIGITS[hundreds] + ' trăm ';
+                    if (tens === 0 && ones > 0) {
+                        result += 'lẻ ';
+                    }
+                }
+
+                if (tens > 1) {
+                    result += DIGITS[tens] + ' mươi ';
+                    if (ones === 1) {
+                        result += 'mốt ';
+                    } else if (ones === 5) {
+                        result += 'lăm ';
+                    } else if (ones > 0) {
+                        result += DIGITS[ones] + ' ';
+                    }
+                } else if (tens === 1) {
+                    result += 'mười ';
+                    if (ones === 5) {
+                        result += 'lăm ';
+                    } else if (ones > 0) {
+                        result += DIGITS[ones] + ' ';
+                    }
+                } else if (ones > 0) {
+                    if (hundreds > 0) {
+                        if (ones === 5) {
+                            result += 'lăm ';
+                        } else {
+                            result += DIGITS[ones] + ' ';
+                        }
+                    } else {
+                        result += DIGITS[ones] + ' ';
+                    }
+                }
+
+                return result.trim();
+            }
+
+            if (!number) return 'Không đồng';
+
+            // Format the number first
+            const formattedNumber = new Intl.NumberFormat('vi-VN', {
+                maximumFractionDigits: 0,
+                minimumFractionDigits: 0
+            }).format(number);
+
+            // Remove all non-digit characters
+            const numStr = formattedNumber.replace(/\D/g, '');
+            const num = parseInt(numStr);
+
+            if (num === 0) return 'Không đồng';
+
+            const groups = [];
+            let tempNumber = Math.abs(num);
+
+            // Split into groups of three digits
+            while (tempNumber > 0) {
+                groups.push(tempNumber % 1000);
+                tempNumber = Math.floor(tempNumber / 1000);
+            }
+
+            let result = '';
+            let hasValue = false;
+
+            // Process each group
+            for (let i = groups.length - 1; i >= 0; i--) {
+                if (groups[i] !== 0) {
+                    const text = readThreeDigits(groups[i]);
+                    if (text) {
+                        result += text + ' ' + UNITS[i] + ' ';
+                        hasValue = true;
+                    }
+                } else if (i % 3 === 0 && hasValue) { // Add 'tỷ' for zero groups in billions
+                    result += UNITS[i] + ' ';
+                }
+            }
+
+            result = result.trim() + ' đồng';
+            return result.charAt(0).toUpperCase() + result.slice(1);
         }
 
         function getContractIdFromUrl() {
@@ -767,6 +855,13 @@
                     document.querySelectorAll('[data-field]').forEach(element => {
                         const fieldName = element.getAttribute('data-field');
                         if (contract[fieldName]) {
+                            if (fieldName === 'PhiChuaVAT') {
+                                element.textContent = formatVietnameseCurrency(contract[fieldName]);
+                                // Thêm số tiền bằng chữ
+                                const amountInWords = numberToVietnameseText(contract[fieldName]);
+                                document.querySelector('#amount-in-words').innerHTML = `(Bằng chữ: ${amountInWords})`;
+                            }
+
                             if (fieldName === 'NgayHopDong') {
                                 element.textContent = formatVietnameseDate(contract[fieldName]);
                             } else if (fieldName === 'TenKH') {
