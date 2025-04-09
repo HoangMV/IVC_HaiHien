@@ -16,6 +16,9 @@
         href="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/css/toast@1.0.1/fuiToast.min.css">
     <script type="text/javascript"
         src="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/js/toast@1.0.1/fuiToast.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
         .export-button {
@@ -335,8 +338,8 @@
             }
         };
 
-        const appId = '45324891-da90-4c7e-89cb-255d02772e29';
-        const accessKey = 'V2-ERBuT-OvzzD-vNJDC-ODMfm-BuZyK-7yfLe-XEsob-vFasR';
+        const appId = '6bea28d8-7d72-4740-8b55-157e2c6ecd28';
+        const accessKey = 'V2-GH0P1-kXYPa-L1yZy-dOZDX-57o7O-a0jGu-iTMmX-Z0yzK';
         const region = 'www';
 
         // Add this new function for printing
@@ -360,63 +363,91 @@
             if (editContentButton) editContentButton.style.display = 'block';
         }
 
-        // Add the export function
-        function exportToWord() {
-            // Lấy nội dung cần xuất (bỏ qua button xuất và scripts)
-            const content = document.body.cloneNode(true);
-            const exportButton = content.querySelector('.export-button');
-            if (exportButton) {
-                exportButton.remove();
+        // Add the export function using template
+        async function exportToWord() {
+            try {
+                // Show loading overlay
+                document.querySelector('.loading-overlay').style.display = 'flex';
+
+                // Collect data from the page
+                const soBB = document.querySelector('[data-field="SoBB"]')?.textContent || '';
+                const ngayBB = document.querySelector('[data-field="NgayBB"]')?.textContent || '';
+                const tenKH = document.querySelector('[data-field="TenKH"]')?.textContent || '';
+                const benGiaoHoTen = document.querySelector('[data-field="BenGiao_HoTen"]')?.textContent || '';
+                const benGiaoSDT = document.querySelector('[data-field="BenGiao_SDT"]')?.textContent || '';
+                const benNhanHoTen = document.querySelector('[data-field="BenNhan_HoTen"]')?.textContent || '';
+                const benNhanSDT = document.querySelector('[data-field="BenNhan_SDT"]')?.textContent || '';
+
+                // Thu thập dữ liệu từ bảng chi tiết tài liệu bàn giao
+                const tableItems = [];
+                const tableRows = document.querySelectorAll('#auditTeamTable tr');
+                tableRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length === 4) {
+                        tableItems.push({
+                            stt: cells[0].textContent.trim(),
+                            noidung: cells[1].textContent.trim(),
+                            soluong: cells[2].textContent.trim(),
+                            ghichu: cells[3].textContent.trim()
+                        });
+                    }
+                });
+
+                // Use a web server path to fetch the template file
+                const response = await fetch('https://kiemtoanivc.github.io/KiemtoanIVC/templates/H992Bangiaotailieu.docx');
+                if (!response.ok) {
+                    throw new Error(`Could not fetch template: ${response.statusText}`);
+                }
+
+                const templateContent = await response.arrayBuffer();
+
+                // Create PizZip instance from binary data
+                const zip = new PizZip(templateContent);
+                const doc = new window.docxtemplater(zip, {
+                    paragraphLoop: true,
+                    linebreaks: true
+                });
+
+                // Set data in template - matching the placeholders in your template
+                const data = {
+                    So_hopdong: soBB,
+                    Ngay_bb: ngayBB,
+                    ten_kh: tenKH,
+                    BenGiao_HoTen: benGiaoHoTen,
+                    BenGiao_SDT: benGiaoSDT,
+                    BenNhan_HoTen: benNhanHoTen,
+                    BenNhan_SDT: benNhanSDT,
+                    tailieu: tableItems  // Mảng chi tiết tài liệu bàn giao
+                };
+
+                console.log('Data passed to template:', data);
+
+                // Render template with data
+                doc.setData(data);
+                doc.render();
+
+                // Create and download file
+                const blob = doc.getZip().generate({
+                    type: "blob",
+                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                });
+
+                const fileName = `ban-giao-tai-lieu-${soBB.replace(/\//g, '-')}.docx`;
+                saveAs(blob, fileName);
+
+                // Show success message
+                FuiToast.success('Xuất file Word thành công');
+
+            } catch (error) {
+                console.error('Error exporting to Word template:', error);
+                if (error.properties && error.properties.errors) {
+                    console.log('Template Error details:', error.properties.errors);
+                }
+                FuiToast.error('Có lỗi khi xuất file Word: ' + error.message);
+            } finally {
+                // Hide loading overlay
+                document.querySelector('.loading-overlay').style.display = 'none';
             }
-
-            const printButton = content.querySelector('.print-button');
-            if (printButton) {
-                printButton.remove();
-            }
-
-            const editbutton = content.querySelector('.edit-button');
-            if (editbutton) {
-                editbutton.remove();
-            }
-
-            const savebutton = content.querySelector('.save-button');
-            if (savebutton) {
-                savebutton.remove();
-            }
-
-            // Tạo style inline để giữ format
-            const css = `
-        body { font-family: 'Times New Roman', serif; }
-        h3 { margin: 0; }
-        .export-button { display: none; }
-    `;
-
-            // Tạo HTML tối giản
-            const html = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-              xmlns:w='urn:schemas-microsoft-com:office:word'>
-        <head>
-            <meta charset='utf-8'>
-            <title>H992 - BÀN GIAO TÀI LIỆU</title>
-            <style>${css}</style>
-        </head>
-        <body>
-            ${content.innerHTML}
-        </body>
-        </html>
-    `;
-
-            // Tạo blob với type phù hợp cho MS Word
-            const blob = new Blob([html], {
-                type: 'application/msword;charset=utf-8'
-            });
-
-            // Download file
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'ban-giao-tai-lieu.doc';
-            link.click();
-            URL.revokeObjectURL(link.href);
         }
 
         function formatVietnameseDate(dateString) {
@@ -517,7 +548,15 @@
             const contractId = getContractIdFromUrl();
             const filteredData = DeliveryRecordsChilden.filter(member => member.ID_BB === contractId);
 
-            // Hiển thị dữ liệu sau khi lọc
+            // Sắp xếp dữ liệu theo cột STT
+            filteredData.sort((a, b) => {
+                // Chuyển STT sang số để so sánh
+                const sttA = parseInt(a.STT);
+                const sttB = parseInt(b.STT);
+                return sttA - sttB;
+            });
+
+            // Hiển thị dữ liệu sau khi lọc và sắp xếp
             filteredData.forEach(member => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -533,11 +572,30 @@
             if (filteredData.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = `
-            <td colspan="3" style="text-align: center;">Không có dữ liệu phù hợp</td>
+            <td colspan="4" style="text-align: center;">Không có dữ liệu phù hợp</td>
         `;
                 tableBody.appendChild(emptyRow);
             }
         }
+
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
 
 
         window.addEventListener('load', fetchContractData);

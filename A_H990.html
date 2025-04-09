@@ -18,6 +18,10 @@
     <script type="text/javascript"
         src="https://cdn.jsdelivr.net/gh/lelinh014756/fui-toast-js@master/assets/js/toast@1.0.1/fuiToast.min.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <style>
         .export-button {
             position: fixed;
@@ -355,27 +359,9 @@
                 document.querySelector('.loading-overlay').style.display = 'none';
             }
         }
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        }, false);
 
-        document.onkeydown = function (e) {
-            if (e.keyCode == 123) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-                return false;
-            }
-        };
-
-        const appId = '45324891-da90-4c7e-89cb-255d02772e29';
-        const accessKey = 'V2-ERBuT-OvzzD-vNJDC-ODMfm-BuZyK-7yfLe-XEsob-vFasR';
+        const appId = '6bea28d8-7d72-4740-8b55-157e2c6ecd28';
+        const accessKey = 'V2-GH0P1-kXYPa-L1yZy-dOZDX-57o7O-a0jGu-iTMmX-Z0yzK';
         const region = 'www';
 
         // Add this new function for printing
@@ -399,63 +385,101 @@
             if (editContentButton) editContentButton.style.display = 'block';
         }
 
-        // Add the export function
-        function exportToWord() {
-            // Lấy nội dung cần xuất (bỏ qua button xuất và scripts)
-            const content = document.body.cloneNode(true);
-            const exportButton = content.querySelector('.export-button');
-            if (exportButton) {
-                exportButton.remove();
+        // Add the export function using template from web server
+        async function exportToWord() {
+            try {
+                // Show loading overlay
+                document.querySelector('.loading-overlay').style.display = 'flex';
+
+                // Collect data from the page
+                const soTamUng = document.querySelector('[data-field="SoTamUng"]')?.textContent || '';
+                const ngayTamUng = document.querySelector('[data-field="NgayTamUng"]')?.textContent || '';
+                const tenKH = document.querySelector('[data-field="TenKH"]')?.textContent || '';
+                const diaChiKH = document.querySelector('[data-field="DiaChiKH"]')?.textContent || '';
+                const nguoiDaiDienKH = document.querySelector('[data-field="NguoiDaiDienKH"]')?.textContent || '';
+                const chucVuKH = document.querySelector('[data-field="ChucVuKH"]')?.textContent || '';
+                const soHopDong = document.querySelector('[data-field="SoHopDong"]')?.textContent || '';
+                const ngayHopDong = document.querySelector('[data-field="NgayHopDong"]')?.textContent || '';
+                const giaHopDongChuaVAT = document.querySelector('[data-field="GiaHopDongChuaVAT"]')?.textContent || '';
+                const vatPercent = document.querySelector('[data-field="VAT"]')?.textContent || '';
+                const giaTienVAT = document.querySelector('[data-field="GiaTienVAT"]')?.textContent || '';
+                const tongGiaTriHopDong = document.querySelector('[data-field="TongGiaTriHopDong"]')?.textContent || '';
+                const luyKeTamUng = document.querySelector('[data-field="LuyKeTamUng"]')?.textContent || '';
+                const dntuDotNay = document.querySelector('[data-field="DNTU_DotNay"]')?.textContent || '';
+
+                // Get amount in words
+                const amountInWordsElement = document.querySelector('#amount-in-words');
+                let soTienTUText = '';
+                if (amountInWordsElement) {
+                    const text = amountInWordsElement.textContent;
+                    const match = text.match(/Bằng chữ: (.*?)(?:\)|\s*$)/);
+                    if (match && match[1]) {
+                        soTienTUText = match[1];
+                    }
+                }
+
+                // Use a web server path to fetch the template file
+                // This assumes you have a 'templates' folder accessible via your web server
+                const response = await fetch('https://kiemtoanivc.github.io/KiemtoanIVC/templates/H990Denghitamung.docx');
+                if (!response.ok) {
+                    throw new Error(`Could not fetch template: ${response.statusText}`);
+                }
+
+                const templateContent = await response.arrayBuffer();
+
+                // Create PizZip instance from binary data
+                const zip = new PizZip(templateContent);
+                const doc = new window.docxtemplater(zip, {
+                    paragraphLoop: true,
+                    linebreaks: true
+                });
+
+                // Set data in template
+                const data = {
+                    So_tamung: soTamUng,
+                    Ngay_tamung_text: ngayTamUng,
+                    nguoi_dai_dien_kh: nguoiDaiDienKH,
+                    chuc_vu_kh: chucVuKH,
+                    ten_kh_upper: tenKH,
+                    dia_chi_kh: diaChiKH,
+                    So_hopdong_text: soHopDong,
+                    Ngay_hopdong_text: ngayHopDong,
+                    Gia_hopdong_chuaVAT: giaHopDongChuaVAT,
+                    VAT_8: giaTienVAT,
+                    Tong_giatri_hopdong: tongGiaTriHopDong,
+                    luyKeTamUng_DaNhan: luyKeTamUng,
+                    DNTU_dotnay_text: dntuDotNay,
+                    So_tien_TU_text: soTienTUText
+                };
+
+                console.log('Data passed to template:', data);
+
+                // Render template with data
+                doc.setData(data);
+                doc.render();
+
+                // Create and download file
+                const blob = doc.getZip().generate({
+                    type: "blob",
+                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                });
+
+                const fileName = `de-nghi-tam-ung-${soTamUng.replace(/\//g, '-')}.docx`;
+                saveAs(blob, fileName);
+
+                // Show success message
+                FuiToast.success('Xuất file Word thành công');
+
+            } catch (error) {
+                console.error('Error exporting to Word template:', error);
+                if (error.properties && error.properties.errors) {
+                    console.log('Template Error details:', error.properties.errors);
+                }
+                FuiToast.error('Có lỗi khi xuất file Word: ' + error.message);
+            } finally {
+                // Hide loading overlay
+                document.querySelector('.loading-overlay').style.display = 'none';
             }
-
-            const printButton = content.querySelector('.print-button');
-            if (printButton) {
-                printButton.remove();
-            }
-
-            const editbutton = content.querySelector('.edit-button');
-            if (editbutton) {
-                editbutton.remove();
-            }
-
-            const savebutton = content.querySelector('.save-button');
-            if (savebutton) {
-                savebutton.remove();
-            }
-
-            // Tạo style inline để giữ format
-            const css = `
-        body { font-family: 'Times New Roman', serif; }
-        h3 { margin: 0; }
-        .export-button { display: none; }
-    `;
-
-            // Tạo HTML tối giản
-            const html = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-              xmlns:w='urn:schemas-microsoft-com:office:word'>
-        <head>
-            <meta charset='utf-8'>
-            <title>H990 - ĐỀ NGHỊ TẠM ỨNG</title>
-            <style>${css}</style>
-        </head>
-        <body>
-            ${content.innerHTML}
-        </body>
-        </html>
-    `;
-
-            // Tạo blob với type phù hợp cho MS Word
-            const blob = new Blob([html], {
-                type: 'application/msword;charset=utf-8'
-            });
-
-            // Download file
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'de-nghi-tam-ung.doc';
-            link.click();
-            URL.revokeObjectURL(link.href);
         }
 
         function formatVietnameseDate(dateString) {
@@ -650,6 +674,26 @@
         </div>`;
             }
         }
+
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+
         window.addEventListener('load', fetchContractData);
     </script>
 </body>
