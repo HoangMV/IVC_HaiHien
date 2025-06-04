@@ -380,8 +380,8 @@
                     body: JSON.stringify({
                         "Action": "Edit",
                         "Properties": {
-                            "Locale": "en-US",
-                            "TimeZone": "Asia/Bangkok"
+                            "Locale": "vi-VN",
+                            "Location": "Hanoi, Vietnam"
                         },
                         "Rows": [{
                             "ID_KHKT": contractId,
@@ -546,7 +546,7 @@
 
         async function fetchContractData() {
             try {
-                const contractId = getContractIdFromUrl(); // Lấy ID_KHKT từ URL
+                const contractId = getContractIdFromUrl();
                 if (!contractId) {
                     throw new Error('Không tìm thấy số hợp đồng trong URL');
                 }
@@ -575,10 +575,9 @@
                     body: JSON.stringify({
                         Action: 'Find',
                         Properties: {},
-                        Selector: `Filter(PlanChildren, ID_KHKT = '${contractId}')`, // Đảm bảo điều kiện lọc
+                        Selector: `Filter(PlanChildren, ID_KHKT = '${contractId}')`,
                     }),
                 });
-
 
                 if (!planResponse.ok || !planChildrenResponse.ok) {
                     throw new Error('Lỗi khi tải dữ liệu từ API.');
@@ -587,33 +586,41 @@
                 const planData = await planResponse.json();
                 const planChildrenData = await planChildrenResponse.json();
 
-                // Hiển thị dữ liệu bảng con
-                if (planChildrenData && planChildrenData.length > 0) {
-                    renderAuditTeam(planChildrenData);
-                }
-
-                // Cập nhật dữ liệu bảng chính nếu cần
                 const contract = planData.find((c) => c.ID_KHKT === contractId);
                 if (!contract) {
                     throw new Error(`Không tìm thấy hợp đồng với ID: ${contractId}`);
                 }
-                document.querySelectorAll('[data-field]').forEach((element) => {
-                    const fieldName = element.getAttribute('data-field');
-                    if (contract[fieldName]) {
-                        if (fieldName === 'ngayKhoach') {
-                            element.textContent = formatVietnameseDate(contract[fieldName]);
+
+                // THÊM LOGIC KIỂM TRA HTML ĐÃ LƯU
+                if (contract.Html && contract.Html.trim()) {
+                    // Nếu có HTML đã lưu, sử dụng HTML đó
+                    document.getElementById('Conten').innerHTML = contract.Html;
+                } else {
+                    // Chỉ khi không có HTML đã lưu mới cập nhật data-field
+                    document.querySelectorAll('[data-field]').forEach((element) => {
+                        const fieldName = element.getAttribute('data-field');
+                        if (contract[fieldName]) {
+                            if (fieldName === 'ngayKhoach') {
+                                element.textContent = formatVietnameseDate(contract[fieldName]);
+                            }
+                            else if (fieldName === 'TuNgayKiemToan' || fieldName === 'DenNgayKiemToan' || fieldName === 'NgayKiemToan' || fieldName === 'NgayBaoCaoKiemToan' || fieldName === 'NgayGuiYeuCauCungCapTaiLieu') {
+                                element.textContent = formatVietnameseDateshort(contract[fieldName]);
+                            }
+                            else if (fieldName === 'TenKH') {
+                                element.textContent = contract['TenKH'].toUpperCase();
+                            }
+                            else {
+                                element.textContent = contract[fieldName];
+                            }
                         }
-                        else if (fieldName === 'TuNgayKiemToan' || fieldName === 'DenNgayKiemToan' || fieldName === 'NgayKiemToan' || fieldName === 'NgayBaoCaoKiemToan' || fieldName === 'NgayGuiYeuCauCungCapTaiLieu') {
-                            element.textContent = formatVietnameseDateshort(contract[fieldName]);
-                        }
-                        else if (fieldName === 'TenKH') {
-                            element.textContent = contract['TenKH'].toUpperCase();
-                        }
-                        else {
-                            element.textContent = contract[fieldName];
-                        }
-                    }
-                });
+                    });
+                }
+
+                // Luôn hiển thị dữ liệu bảng con
+                if (planChildrenData && planChildrenData.length > 0) {
+                    renderAuditTeam(planChildrenData);
+                }
+
             } catch (error) {
                 console.error('Lỗi khi tải dữ liệu:', error);
                 document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">

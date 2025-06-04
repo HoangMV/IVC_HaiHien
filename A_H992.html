@@ -289,8 +289,8 @@
                     body: JSON.stringify({
                         "Action": "Edit",
                         "Properties": {
-                            "Locale": "en-US",
-                            "TimeZone": "Asia/Bangkok"
+                            "Locale": "vi-VN",
+                            "Location": "Hanoi, Vietnam"
                         },
                         "Rows": [{
                             "ID_BB": contractId,
@@ -496,10 +496,9 @@
                     body: JSON.stringify({
                         Action: 'Find',
                         Properties: {},
-                        Selector: `Filter(DeliveryRecordsChilden, ID_BB = '${contractId}')`, // Đảm bảo điều kiện lọc
+                        Selector: `Filter(DeliveryRecordsChilden, ID_BB = '${contractId}')`,
                     }),
                 });
-
 
                 if (!DeliveryRecordsResponse.ok || !DeliveryRecordsChildenResponse.ok) {
                     throw new Error('Lỗi khi tải dữ liệu từ API.');
@@ -508,30 +507,38 @@
                 const DeliveryRecordsData = await DeliveryRecordsResponse.json();
                 const DeliveryRecordsChildenData = await DeliveryRecordsChildenResponse.json();
 
-                // Hiển thị dữ liệu bảng con
-                if (DeliveryRecordsChildenData && DeliveryRecordsChildenData.length > 0) {
-                    renderAuditTeam(DeliveryRecordsChildenData);
-                }
-
-                // Cập nhật dữ liệu bảng chính nếu cần
                 const contract = DeliveryRecordsData.find((c) => c.ID_BB === contractId);
                 if (!contract) {
                     throw new Error(`Không tìm thấy hợp đồng với ID: ${contractId}`);
                 }
-                document.querySelectorAll('[data-field]').forEach((element) => {
-                    const fieldName = element.getAttribute('data-field');
-                    if (contract[fieldName]) {
-                        if (fieldName === 'NgayBB') {
-                            element.textContent = formatVietnameseDate(contract[fieldName]);
+
+                // THÊM LOGIC KIỂM TRA HTML ĐÃ LƯU
+                if (contract.Html && contract.Html.trim()) {
+                    // Nếu có HTML đã lưu, sử dụng HTML đó
+                    document.getElementById('Conten').innerHTML = contract.Html;
+                } else {
+                    // Chỉ khi không có HTML đã lưu mới cập nhật data-field
+                    document.querySelectorAll('[data-field]').forEach((element) => {
+                        const fieldName = element.getAttribute('data-field');
+                        if (contract[fieldName]) {
+                            if (fieldName === 'NgayBB') {
+                                element.textContent = formatVietnameseDate(contract[fieldName]);
+                            }
+                            else if (fieldName === 'TenKH') {
+                                element.textContent = contract['TenKH'].toUpperCase();
+                            }
+                            else {
+                                element.textContent = contract[fieldName];
+                            }
                         }
-                        else if (fieldName === 'TenKH') {
-                            element.textContent = contract['TenKH'].toUpperCase();
-                        }
-                        else {
-                            element.textContent = contract[fieldName];
-                        }
-                    }
-                });
+                    });
+                }
+
+                // Luôn hiển thị dữ liệu bảng con
+                if (DeliveryRecordsChildenData && DeliveryRecordsChildenData.length > 0) {
+                    renderAuditTeam(DeliveryRecordsChildenData);
+                }
+
             } catch (error) {
                 console.error('Lỗi khi tải dữ liệu:', error);
                 document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">
