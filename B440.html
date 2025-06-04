@@ -501,8 +501,8 @@
                     body: JSON.stringify({
                         "Action": "Edit",
                         "Properties": {
-                            "Locale": "en-US",
-                            "TimeZone": "Asia/Bangkok"
+                            "Locale": "vi-VN",
+                            "Location": "Hanoi, Vietnam"
                         },
                         "Rows": [{
                             "ID_So_thu_giaitrinh": contractId,
@@ -642,7 +642,7 @@
 
         function formatVietnameseDate(dateString) {
             const date = new Date(dateString);
-            return `ngày ${String(date.getDate()).padStart(2, '0')} tháng ${String(date.getMonth() + 1).padStart(2, '0')} năm ${date.getFullYear()}`;
+            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
         }
 
         function getContractIdFromUrl() {
@@ -681,12 +681,12 @@
                     throw new Error(`Không tìm thấy hợp đồng với số: ${contractId}`);
                 }
 
-                // Kiểm tra nếu có dữ liệu HTML được lưu trữ
+                // THÊM LOGIC KIỂM TRA HTML ĐÃ LƯU
                 if (contract.Html && contract.Html.trim()) {
-                    // Nếu có, render nội dung HTML đã lưu
+                    // Nếu có HTML đã lưu, sử dụng HTML đó
                     document.getElementById('Conten').innerHTML = contract.Html;
                 } else {
-                    // Nếu không có, điền dữ liệu vào template mặc định
+                    // Chỉ khi không có HTML đã lưu mới cập nhật data-field
                     document.querySelectorAll('[data-field]').forEach(element => {
                         const fieldName = element.getAttribute('data-field');
                         if (contract[fieldName]) {
