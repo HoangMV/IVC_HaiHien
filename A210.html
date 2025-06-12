@@ -61,12 +61,57 @@
 
         @media print {
 
+            /* Ẩn tất cả các button */
             .print-button,
             .export-button,
             .edit-button,
-            .save-button {
-                display: none;
+            .save-button,
+            .info-button {
+                display: none !important;
             }
+
+            /* Reset style cho các trường data-field khi in */
+            [data-field] {
+                background-color: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+            }
+
+            /* Ẩn tooltip khi in */
+            [data-field]:hover::after {
+                display: none !important;
+            }
+        }
+
+        /* Thêm vào phần <style> */
+        [data-field] {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px dashed #ffc107;
+            position: relative;
+            cursor: pointer;
+        }
+
+        [data-field]:hover {
+            background-color: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+
+        [data-field]:hover::after {
+            content: "Có thể chỉnh sửa";
+            position: absolute;
+            background: #2d3436;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            top: -30px;
+            left: 0;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
         }
 
         .save-button {
@@ -237,37 +282,38 @@
 
         <!-- Party B -->
         <div style="margin-top: 25px;">
-            <p style="margin: 0; font-weight: bold; ">BÊN B: CÔNG TY TNHH KIỂM TOÁN IVC</p>
+            <p style="margin: 0; font-weight: bold;">BÊN B: CÔNG TY TNHH KIỂM TOÁN IVC</p>
             <table style="margin-left: 40px; border-collapse: collapse;">
                 <tr>
                     <td style="width: 120px; padding: 5px 0; font-weight: bold;">Người đại diện</td>
-                    <td style="padding: 5px 0; font-weight: bold;"> : Ông Phạm Duy Hiệp</td>
+                    <td style="padding: 5px 0; font-weight: bold;"> : <span data-field="NguoiDaiDien">Ông Phạm Duy
+                            Hiệp</span></td>
                 </tr>
                 <tr>
                     <td style="width: 120px; padding: 5px 0;">Chức vụ</td>
-                    <td style="padding: 5px 0;"> : Phó Tổng Giám đốc</td>
+                    <td style="padding: 5px 0;"> : <span data-field="ChucVu">Phó Tổng Giám đốc</span></td>
                 </tr>
                 <tr>
                     <td style="width: 120px; padding: 5px 0;">Địa chỉ</td>
-                    <td style="padding: 5px 0;"> : Tầng 2, số 1 ngõ 2 Láng Hạ, phường Thành Công, quận Ba Đình, thành
-                        phố Hà
-                        Nội</td>
+                    <td style="padding: 5px 0;"> : <span data-field="DiaChi">Tầng 2, số 1 ngõ 2 Láng Hạ, phường Thành
+                            Công, quận Ba Đình, thành phố Hà Nội</span></td>
                 </tr>
                 <tr>
                     <td style="width: 120px; padding: 5px 0;">Điện thoại</td>
-                    <td style="padding: 5px 0;"> : 0943 863 073</td>
+                    <td style="padding: 5px 0;"> : <span data-field="DienThoai">0943 863 073</span></td>
                 </tr>
                 <tr>
                     <td style="width: 120px; padding: 5px 0;">Mã số thuế</td>
-                    <td style="padding: 5px 0;"> : 0109564702</td>
+                    <td style="padding: 5px 0;"> : <span data-field="MaSoThue_DD">0109564702</span></td>
                 </tr>
                 <tr>
                     <td style="width: 120px; padding: 5px 0;">Tài khoản số</td>
-                    <td style="padding: 5px 0;"> : 0909597168888</td>
+                    <td style="padding: 5px 0;"> : <span data-field="TaiKhoan">0909597168888</span></td>
                 </tr>
                 <tr>
                     <td style="width: 120px; padding: 5px 0;">Tại Ngân hàng</td>
-                    <td style="padding: 5px 0;"> : Ngân hàng TMCP Quân Đội - CN Hoài Đức</td>
+                    <td style="padding: 5px 0;"> : <span data-field="NganHangNganHang">Ngân hàng TMCP Quân Đội - CN Hoài
+                            Đức</span></td>
                 </tr>
             </table>
         </div>
@@ -602,7 +648,7 @@
                             const [, day, month, year] = match;
                             variableValues[fieldName] = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
                         }
-                    } else{
+                    } else {
                         variableValues[fieldName] = value;
                     }
                 });
@@ -702,7 +748,16 @@
                     tai_ngan_hang: contractData.TaiNganHang || '',
                     phi_chua_vat: contractData.PhiChuaVAT ? formatVietnameseCurrency(contractData.PhiChuaVAT) : '',
                     amount_in_words: contractData.PhiChuaVAT ? numberToVietnameseText(contractData.PhiChuaVAT) : '',
-                    nam_ket_thuc: contractData.NamKiT || ''
+                    nam_ket_thuc: contractData.NamKiT || '',
+
+                    // Thêm các trường cho BÊN B
+                    nguoi_dai_dien: contractData.NguoiDaiDien || 'Ông Phạm Duy Hiệp',
+                    chuc_vu: contractData.ChucVu || 'Phó Tổng Giám đốc',
+                    dia_chi: contractData.DiaChi || 'Tầng 2, số 1 ngõ 2 Láng Hạ, phường Thành Công, quận Ba Đình, thành phố Hà Nội',
+                    dien_thoai: contractData.DienThoai || '0943 863 073',
+                    ma_so_thue_dd: contractData.MaSoThue_DD || '0109564702',
+                    tai_khoan: contractData.TaiKhoan || '0909597168888',
+                    ngan_hang_ngan_hang: contractData.NganHangNganHang || 'Ngân hàng TMCP Quân Đội - CN Hoài Đức'
                 };
 
                 const response = await fetch('https://kiemtoanivc.github.io/KiemtoanIVC/templates/A210HDKT.docx');
@@ -862,7 +917,8 @@
                     throw new Error('Không tìm thấy số hợp đồng trong URL');
                 }
 
-                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Contracts/Action`, {
+                // Fetch dữ liệu hợp đồng
+                const contractResponse = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Contracts/Action`, {
                     method: 'POST',
                     headers: {
                         'ApplicationAccessKey': accessKey,
@@ -875,37 +931,61 @@
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (!contractResponse.ok) {
+                    throw new Error(`HTTP error! status: ${contractResponse.status}`);
                 }
 
-                const data = await response.json();
-                const contract = data.find(c => c.ID_HopDong === contractId);
+                // SỬA: Đổi tên biến để tránh xung đột
+                const contractDataResponse = await contractResponse.json();
+                const contract = contractDataResponse.find(c => c.ID_HopDong === contractId);
 
                 if (!contract) {
                     throw new Error(`Không tìm thấy hợp đồng với số: ${contractId}`);
                 }
 
-                let finalData = contract;
+                // Fetch thông tin khách hàng dựa trên MaKH (liên kết đến ID_KH)
+                let customerData = {};
+                if (contract.MaKH) {
+                    const customerResponse = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/Customers/Action`, {
+                        method: 'POST',
+                        headers: {
+                            'ApplicationAccessKey': accessKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            Action: 'Find',
+                            Properties: {},
+                            Selector: `Filter(Customers, ID_KH = '${contract.MaKH}')`
+                        })
+                    });
+
+                    if (customerResponse.ok) {
+                        const customers = await customerResponse.json();
+                        const customer = customers.find(c => c.ID_KH === contract.MaKH);
+                        if (customer) {
+                            customerData = customer;
+                            console.log('Thông tin khách hàng:', customerData);
+                        }
+                    }
+                }
+
+                // Merge dữ liệu hợp đồng và khách hàng
+                let finalData = { ...contract, ...customerData };
 
                 // Kiểm tra có dữ liệu đã sửa trong cột Html không
                 if (contract.Html && contract.Html.trim()) {
                     try {
-                        // Parse JSON từ cột Html
                         const savedVariables = JSON.parse(contract.Html);
-
-                        // Merge dữ liệu gốc với dữ liệu đã sửa
-                        finalData = { ...contract, ...savedVariables };
-
+                        finalData = { ...finalData, ...savedVariables };
                         console.log('Sử dụng dữ liệu đã sửa:', savedVariables);
-                        console.log('Dữ liệu cuối cùng:', finalData);
                     } catch (e) {
                         console.warn('Không thể parse dữ liệu từ cột Html, sử dụng dữ liệu gốc');
                     }
                 }
 
-                // Lưu vào biến global để xuất Word
+                // Lưu vào biến global (contractData đã được khai báo ở đầu với let)
                 contractData = finalData;
+                console.log('Dữ liệu cuối cùng:', finalData);
 
                 // Điền dữ liệu vào template
                 document.querySelectorAll('[data-field]').forEach(element => {
@@ -928,7 +1008,7 @@
             } catch (error) {
                 console.error('Failed to fetch data:', error);
                 document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">
-           Lỗi khi tải dữ liệu: ${error.message}
+          Lỗi khi tải dữ liệu: ${error.message}
        </div>`;
             }
         }
