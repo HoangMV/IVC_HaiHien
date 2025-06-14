@@ -61,10 +61,57 @@
 
         @media print {
 
+            /* Ẩn tất cả các button */
             .print-button,
-            .export-button {
-                display: none;
+            .export-button,
+            .edit-button,
+            .save-button,
+            .info-button {
+                display: none !important;
             }
+
+            /* Reset style cho các trường data-field khi in */
+            [data-field] {
+                background-color: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+            }
+
+            /* Ẩn tooltip khi in */
+            [data-field]:hover::after {
+                display: none !important;
+            }
+        }
+
+        /* Thêm vào phần <style> */
+        [data-field] {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px dashed #ffc107;
+            position: relative;
+            cursor: pointer;
+        }
+
+        [data-field]:hover {
+            background-color: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+
+        [data-field]:hover::after {
+            content: "Có thể chỉnh sửa";
+            position: absolute;
+            background: #2d3436;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            top: -30px;
+            left: 0;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
         }
 
         .save-button {
@@ -225,7 +272,8 @@
         </table>
         <p style="margin-left: 20px; text-align: justify;">
             <span>Khi nhận được tài liệu nêu trên, Quý vị vui lòng thông báo lại cho kiểm toán viên của chúng tôi (Mr
-                <span data-field="BenGiao_HoTen"></span> , số điện thoại <span data-field="BenGiao_SDT"></span>). Quý vị
+                <span data-field="BenGiao_HoTen2"></span> , số điện thoại <span data-field="BenGiao_SDT2"></span>). Quý
+                vị
                 vui lòng ký, đóng dấu hồ sơ và chuyển lại cho
                 kiểm toán viên của chúng tôi số bản lưu theo như nội dung Ghi chú theo địa chỉ: </span><br>
             <span>+ Công ty TNHH Kiểm toán IVC</span><br>
@@ -236,6 +284,25 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
     <script>
+        // Biến global để lưu dữ liệu
+        let contractData = {};
+
+        // Hàm xử lý cột DaiDien
+        function parseDaiDienData(daiDienString) {
+            if (!daiDienString || typeof daiDienString !== 'string') {
+                return {
+                    BenGiao_HoTen: '',
+                    BenGiao_SDT: ''
+                };
+            }
+
+            const parts = daiDienString.split('|');
+
+            return {
+                BenGiao_HoTen: parts[0] || '',
+                BenGiao_SDT: parts[1] || ''
+            };
+        }
 
         function editContent() {
             $('#Conten').summernote({
@@ -275,10 +342,34 @@
 
                 const contractId = getContractIdFromUrl();
                 if (!contractId) {
-                    throw new Error('Không tìm thấy ID đề nghị tạm ứng');
+                    throw new Error('Không tìm thấy ID bàn giao tài liệu');
                 }
 
-                const content = $('#Conten').summernote('code');
+                // Lấy giá trị RAW (chưa format) từ editor
+                const variableValues = {};
+
+                // Lấy giá trị từ các span và convert về dạng raw
+                document.querySelectorAll('[data-field]').forEach(element => {
+                    const fieldName = element.getAttribute('data-field');
+                    let value = element.textContent || '';
+
+                    // Convert các giá trị đã format về dạng raw để lưu
+                    if (fieldName === 'NgayBB') {
+                        // Từ "ngày 26 tháng 04 năm 2025" về "2025-04-26"
+                        const match = value.match(/ngày (\d+) tháng (\d+) năm (\d+)/);
+                        if (match) {
+                            const [, day, month, year] = match;
+                            variableValues[fieldName] = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                        }
+                    } else {
+                        variableValues[fieldName] = value;
+                    }
+                });
+
+                console.log('Dữ liệu sẽ lưu:', variableValues);
+
+                // Lưu JSON string vào cột Html
+                const jsonString = JSON.stringify(variableValues);
 
                 const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/DeliveryRecords/Action`, {
                     method: 'POST',
@@ -289,12 +380,12 @@
                     body: JSON.stringify({
                         "Action": "Edit",
                         "Properties": {
-                            "Locale": "vi-VN",
-                            "Location": "Hanoi, Vietnam"
+                            "Locale": "en-US",
+                            "TimeZone": "Asia/Bangkok"
                         },
                         "Rows": [{
                             "ID_BB": contractId,
-                            "Html": content
+                            "Html": jsonString
                         }]
                     })
                 });
@@ -305,7 +396,9 @@
 
                 $('#Conten').summernote('destroy');
 
-                document.getElementById('Conten').innerHTML = content;
+                // Reload dữ liệu để hiển thị
+                await fetchContractData();
+
                 document.querySelector('.save-button').style.display = 'none';
                 document.querySelector('.edit-button').style.display = 'block';
                 document.querySelector('.export-button').style.display = 'block';
@@ -313,30 +406,12 @@
                 FuiToast.success('Đã lưu thành công')
 
             } catch (error) {
+                console.error('Lỗi lưu:', error);
                 FuiToast.error('Có lỗi xảy ra khi lưu: ' + error.message)
             } finally {
                 document.querySelector('.loading-overlay').style.display = 'none';
             }
         }
-
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        }, false);
-
-        document.onkeydown = function (e) {
-            if (e.keyCode == 123) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-                return false;
-            }
-        };
 
         const appId = '6bea28d8-7d72-4740-8b55-157e2c6ecd28';
         const accessKey = 'V2-GH0P1-kXYPa-L1yZy-dOZDX-57o7O-a0jGu-iTMmX-Z0yzK';
@@ -347,7 +422,6 @@
             const printButton = document.querySelector('.print-button');
             const exportButton = document.querySelector('.export-button');
             const editContentButton = document.querySelector('.edit-button');
-
 
             // Hide both buttons
             if (printButton) printButton.style.display = 'none';
@@ -369,15 +443,6 @@
                 // Show loading overlay
                 document.querySelector('.loading-overlay').style.display = 'flex';
 
-                // Collect data from the page
-                const soBB = document.querySelector('[data-field="SoBB"]')?.textContent || '';
-                const ngayBB = document.querySelector('[data-field="NgayBB"]')?.textContent || '';
-                const tenKH = document.querySelector('[data-field="TenKH"]')?.textContent || '';
-                const benGiaoHoTen = document.querySelector('[data-field="BenGiao_HoTen"]')?.textContent || '';
-                const benGiaoSDT = document.querySelector('[data-field="BenGiao_SDT"]')?.textContent || '';
-                const benNhanHoTen = document.querySelector('[data-field="BenNhan_HoTen"]')?.textContent || '';
-                const benNhanSDT = document.querySelector('[data-field="BenNhan_SDT"]')?.textContent || '';
-
                 // Thu thập dữ liệu từ bảng chi tiết tài liệu bàn giao
                 const tableItems = [];
                 const tableRows = document.querySelectorAll('#auditTeamTable tr');
@@ -392,6 +457,18 @@
                         });
                     }
                 });
+
+                // Sử dụng dữ liệu từ biến global và format lại cho Word
+                const data = {
+                    So_hopdong: contractData.SoBB || '',
+                    Ngay_bb: contractData.NgayBB ? formatVietnameseDate(contractData.NgayBB) : '',
+                    ten_kh: contractData.TenKH || '',
+                    BenGiao_HoTen: contractData.BenGiao_HoTen || '',
+                    BenGiao_SDT: contractData.BenGiao_SDT || '',
+                    BenNhan_HoTen: contractData.BenNhan_HoTen || '',
+                    BenNhan_SDT: contractData.BenNhan_SDT || '',
+                    tailieu: tableItems  // Mảng chi tiết tài liệu bàn giao
+                };
 
                 // Use a web server path to fetch the template file
                 const response = await fetch('https://kiemtoanivc.github.io/KiemtoanIVC/templates/H992Bangiaotailieu.docx');
@@ -408,18 +485,6 @@
                     linebreaks: true
                 });
 
-                // Set data in template - matching the placeholders in your template
-                const data = {
-                    So_hopdong: soBB,
-                    Ngay_bb: ngayBB,
-                    ten_kh: tenKH,
-                    BenGiao_HoTen: benGiaoHoTen,
-                    BenGiao_SDT: benGiaoSDT,
-                    BenNhan_HoTen: benNhanHoTen,
-                    BenNhan_SDT: benNhanSDT,
-                    tailieu: tableItems  // Mảng chi tiết tài liệu bàn giao
-                };
-
                 console.log('Data passed to template:', data);
 
                 // Render template with data
@@ -432,7 +497,7 @@
                     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 });
 
-                const fileName = `ban-giao-tai-lieu-${soBB.replace(/\//g, '-')}.docx`;
+                const fileName = `ban-giao-tai-lieu-${(contractData.SoBB || 'unknown').replace(/\//g, '-')}.docx`;
                 saveAs(blob, fileName);
 
                 // Show success message
@@ -469,7 +534,7 @@
             try {
                 const contractId = getContractIdFromUrl(); // Lấy ID_BB từ URL
                 if (!contractId) {
-                    throw new Error('Không tìm thấy số hợp đồng trong URL');
+                    throw new Error('Không tìm thấy số biên bản trong URL');
                 }
 
                 // Gọi API để lấy dữ liệu bảng chính (DeliveryRecords)
@@ -509,30 +574,76 @@
 
                 const contract = DeliveryRecordsData.find((c) => c.ID_BB === contractId);
                 if (!contract) {
-                    throw new Error(`Không tìm thấy hợp đồng với ID: ${contractId}`);
+                    throw new Error(`Không tìm thấy biên bản với ID: ${contractId}`);
                 }
 
-                // THÊM LOGIC KIỂM TRA HTML ĐÃ LƯU
-                if (contract.Html && contract.Html.trim()) {
-                    // Nếu có HTML đã lưu, sử dụng HTML đó
-                    document.getElementById('Conten').innerHTML = contract.Html;
-                } else {
-                    // Chỉ khi không có HTML đã lưu mới cập nhật data-field
-                    document.querySelectorAll('[data-field]').forEach((element) => {
-                        const fieldName = element.getAttribute('data-field');
-                        if (contract[fieldName]) {
-                            if (fieldName === 'NgayBB') {
-                                element.textContent = formatVietnameseDate(contract[fieldName]);
-                            }
-                            else if (fieldName === 'TenKH') {
-                                element.textContent = contract['TenKH'].toUpperCase();
-                            }
-                            else {
-                                element.textContent = contract[fieldName];
-                            }
-                        }
-                    });
+                let finalData = contract;
+
+                // Xử lý cột DaiDien
+                if (contract.DaiDien) {
+                    const daiDienData = parseDaiDienData(contract.DaiDien);
+                    finalData = { ...finalData, ...daiDienData };
+                    console.log('Dữ liệu DaiDien đã parse:', daiDienData);
                 }
+
+                // Kiểm tra có dữ liệu đã sửa trong cột Html không
+                if (contract.Html && contract.Html.trim()) {
+                    try {
+                        // Parse JSON từ cột Html
+                        const savedVariables = JSON.parse(contract.Html);
+
+                        // Merge dữ liệu gốc với dữ liệu đã sửa
+                        finalData = { ...finalData, ...savedVariables };
+
+                        console.log('Sử dụng dữ liệu đã sửa:', savedVariables);
+                        console.log('Dữ liệu cuối cùng:', finalData);
+                    } catch (e) {
+                        console.warn('Không thể parse dữ liệu từ cột Html, sử dụng dữ liệu gốc');
+                    }
+                }
+
+                // Lưu vào biến global để xuất Word
+                contractData = finalData;
+
+                // Điền dữ liệu vào template
+                document.querySelectorAll('[data-field]').forEach((element) => {
+                    const fieldName = element.getAttribute('data-field');
+
+                    let value = null;
+                    let hasValue = false;
+
+                    // Xử lý các trường có mapping đặc biệt
+                    if (fieldName === 'BenGiao_HoTen2') {
+                        // Lấy từ BenGiao_HoTen hoặc dữ liệu đã sửa
+                        value = finalData['BenGiao_HoTen2'] || finalData['BenGiao_HoTen'] || '';
+                        hasValue = value !== '';
+                    } else if (fieldName === 'BenGiao_SDT2') {
+                        // Lấy từ BenGiao_SDT hoặc dữ liệu đã sửa  
+                        value = finalData['BenGiao_SDT2'] || finalData['BenGiao_SDT'] || '';
+                        hasValue = value !== '';
+                    } else {
+                        value = finalData[fieldName];
+                        hasValue = value !== undefined && value !== null && value !== '';
+                    }
+
+                    if (hasValue) {
+                        // Xử lý trường ngày tháng
+                        if (fieldName === 'NgayBB') {
+                            element.textContent = formatVietnameseDate(value);
+                        }
+                        // Xử lý trường tên khách hàng (uppercase)
+                        else if (fieldName === 'TenKH') {
+                            element.textContent = (value || '').toUpperCase();
+                        }
+                        // Các trường khác
+                        else {
+                            element.textContent = value;
+                        }
+                    } else {
+                        // Hiển thị placeholder cho các trường trống
+                        element.textContent = '___';
+                    }
+                });
 
                 // Luôn hiển thị dữ liệu bảng con
                 if (DeliveryRecordsChildenData && DeliveryRecordsChildenData.length > 0) {
@@ -542,8 +653,8 @@
             } catch (error) {
                 console.error('Lỗi khi tải dữ liệu:', error);
                 document.body.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">
-            Lỗi khi tải dữ liệu: ${error.message}
-        </div>`;
+                Lỗi khi tải dữ liệu: ${error.message}
+            </div>`;
             }
         }
 
@@ -567,11 +678,11 @@
             filteredData.forEach(member => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td style="border: 1px solid black; text-align: center;">${member.STT}</td>
-            <td style="border: 1px solid black; text-align: center;">${member['Nội dung']}</td>
-            <td style="border: 1px solid black; text-align: center;">${member['Số lượng']}</td>
-            <td style="border: 1px solid black; text-align: center;">${member['Ghi chú']}</td>
-        `;
+                <td style="border: 1px solid black; text-align: center;">${member.STT}</td>
+                <td style="border: 1px solid black; text-align: center;">${member['Nội dung']}</td>
+                <td style="border: 1px solid black; text-align: center;">${member['Số lượng']}</td>
+               <td style="border: 1px solid black; text-align: center;">${member['Ghi chú']}</td>
+           `;
                 tableBody.appendChild(row);
             });
 
@@ -579,11 +690,13 @@
             if (filteredData.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.innerHTML = `
-            <td colspan="4" style="text-align: center;">Không có dữ liệu phù hợp</td>
-        `;
+               <td colspan="4" style="text-align: center;">Không có dữ liệu phù hợp</td>
+           `;
                 tableBody.appendChild(emptyRow);
             }
         }
+
+        window.addEventListener('load', fetchContractData);
 
         document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
@@ -603,9 +716,6 @@
                 return false;
             }
         };
-
-
-        window.addEventListener('load', fetchContractData);
     </script>
 </body>
 
